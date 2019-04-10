@@ -13,42 +13,42 @@ DiscreteSlider tries to offer you the slider with value label as shown in the [M
 
 ## Usage
    
-Setup *Track* in Java
+Setup **Track** in Java
 ```java
 mSlider.setTrackWidth(Utils.convertDpToPixel(4, this));
 mSlider.setTrackColor(0xFFD81B60);
 mSlider.setInactiveTrackColor(0x3DD81B60);
 ```
    
-Setup *Track* in Xml
+Setup **Track** in Xml
 ```xml
 app:trackWidth="4dp"
 app:trackColor="#D81B60"
 app:inactiveTrackColor="#3DD81B60"
 ```
    
-Setup *Thumb* in Java
+Setup **Thumb** in Java
 ```java
 mSlider.setThumbRadius(Utils.convertDpToPixel(6, this));
 mSlider.setThumbColor(0xFFD81B60);
 mSlider.setThumbPressedColor(0x1FD81B60);
 ```
    
-Setup *Thumb* in Xml
+Setup **Thumb** in Xml
 ```xml
 app:thumbRadius="6dp"
 app:thumbColor="#D81B60"
 app:thumbPressedColor="#1FD81B60"
 ```
    
-Setup *TickMark* in Java
+Setup **TickMark** in Java
 ```java
 mSlider.setTickMarkColor(0x3DFFFFFF);
 mSlider.setTickMarkInactiveColor(0x1FD81B60);
 mSlider.setTickMarkPatterns(Arrays.asList(new Dot(), new Dash(Utils.convertDpToPixel(1, this))));
 ```
    
-Setup *TickMark* in Xml
+Setup **TickMark** in Xml
 ```xml
 app:tickMarkColor="#3DFFFFFF"
 app:tickMarkInactiveColor="#1FD81B60"
@@ -56,7 +56,7 @@ app:tickMarkPatterns="dot,dash" <!-- Separated by commas, only accept `dot` or `
 app:tickMarkDashLength="1dp"
 ```
    
-Setup *ValueLabel* in Java
+Setup **ValueLabel** in Java
 ```java
 mSlider.setValueLabelTextColor(Color.WHITE);
 mSlider.setValueLabelTextSize(Utils.convertSpToPixel(16, this));
@@ -69,32 +69,32 @@ mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 });
 ```
 
-Setup *ValueLabel* in Xml
+Setup **ValueLabel** in Xml
 ```xml
 app:valueLabelTextColor="#FFF"
 app:valueLabelTextSize="16sp
 ```
    
-Setup *Progress* in Java
+Setup **Progress** in Java
 ```java
 mSlider.setCount(21);
 mSlider.setLeftProgress(5);
 mSlider.setRightProgress(10); // Only can call in range mode.
 ```
    
-Setup *Progress* in Xml
+Setup **Progress** in Xml
 ```xml
 app:count="21"
 app:leftProgress="5"
 app:rightProgress="5"
 ```
    
-Setup *Mode* in Java
+Setup **Mode** in Java
 ```java
 mSlider.setMode(DiscreteSlider.MODE_RANGE);
 ```
    
-Setup *Mode* in Xml
+Setup **Mode** in Xml
 ```xml
 app:mode="range"
 ```
