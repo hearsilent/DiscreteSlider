@@ -52,7 +52,8 @@ Setup **TickMark** in Xml
 ```xml
 app:tickMarkColor="#3DFFFFFF"
 app:tickMarkInactiveColor="#1FD81B60"
-app:tickMarkPatterns="dot,dash" <!-- Separated by commas, only accept `dot` or `dash`. You can also fill in "dot,dash,dash"-->
+<!-- Separated by commas, only accept `dot` or `dash`. You can also fill in "dot,dash,dash"-->
+app:tickMarkPatterns="dot,dash"
 app:tickMarkDashLength="1dp"
 ```
    
