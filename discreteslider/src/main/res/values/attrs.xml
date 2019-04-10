@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="progress" format="integer" />
+
+    <declare-styleable name="DiscreteSlider">
+
+        <attr name="trackWidth" format="dimension" />
+        <attr name="trackColor" format="color" />
+        <attr name="inactiveTrackColor" format="color" />
+
+        <attr name="thumbRadius" format="dimension" />
+        <attr name="thumbColor" format="color" />
+        <attr name="thumbPressedColor" format="color" />
+
+        <attr name="tickMarkPatterns" format="string" />
+        <attr name="tickMarkDashLength" format="dimension" />
+        <attr name="tickMarkColor" format="color" />
+        <attr name="tickMarkInactiveColor" format="color" />
+
+        <attr name="valueLabelTextColor" format="color" />
+        <attr name="valueLabelTextSize" format="dimension" />
+
+        <attr name="count" format="integer" />
+        <attr name="mode" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="range" value="1" />
+        </attr>
+
+        <attr name="progress" />
+        <attr name="leftProgress" format="integer" />
+        <attr name="rightProgress" format="integer" />
+
+    </declare-styleable>
+
+</resources>

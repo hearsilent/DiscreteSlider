@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <hearsilent.discreteslider.DiscreteSlider
+        android:id="@+id/discreteSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:count="21"
+        app:inactiveTrackColor="#3DD81B60"
+        app:leftProgress="5"
+        app:mode="range"
+        app:rightProgress="10"
+        app:valueLabelTextColor="#FFF"
+        app:valueLabelTextSize="16sp"
+        app:thumbColor="@color/colorAccent"
+        app:thumbPressedColor="#1FD81B60"
+        app:thumbRadius="6dp"
+        app:tickMarkColor="#3DFFFFFF"
+        app:tickMarkDashLength="1dp"
+        app:tickMarkInactiveColor="#1FD81B60"
+        app:tickMarkPatterns="dot,dash"
+        app:trackColor="@color/colorAccent"
+        app:trackWidth="4dp" />
+
+</LinearLayout>
