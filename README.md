@@ -1,4 +1,6 @@
 # DiscreteSlider
+[![GitHub release](https://img.shields.io/jitpack/v/github/hearsilent/DiscreteSlider.svg?maxAge=2592000)](https://github.com/hearsilent/DiscreteSlider)
+[![license](https://img.shields.io/github/license/hearsilent/DiscreteSlider.svg?maxAge=2592000)](https://github.com/hearsilent/DiscreteSlider/blob/master/LICENSE)
 
 DiscreteSlider tries to offer you the slider with value label as shown in the [Material Design spec](https://material.io/design/components/sliders.html), with an API. The library also offer you range slider mode.
 
@@ -10,6 +12,20 @@ DiscreteSlider tries to offer you the slider with value label as shown in the [M
 
 ### Range Mode
 <img src="https://raw.githubusercontent.com/hearsilent/DiscreteSlider/master/screenshots/device-2019-04-10-215451.png" height="500">
+
+## Setup
+
+The easiest way to add the **DiscreteSlider** library to your project is by adding it as a dependency to your build.gradle
+
+```gradle
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation 'com.github.hearsilent:DiscreteSlider:1.0.1'
+}
+```
 
 ## Usage
    
