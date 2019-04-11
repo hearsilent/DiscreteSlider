@@ -101,12 +101,12 @@ Setup **Mode** in Xml
 app:mode="range"
 ```
    
-Setup ***Click to Move* in Java (By default is `false`)
+Setup **Click to Move** in Java (By default is `false`)
 ```java
 mSlider.setClickable(true);
 ```
    
-Setup ***Click to Move* in Xml (By default is `false`)
+Setup **Click to Move** in Xml (By default is `false`)
 ```xml
 android:clickable="true"
 android:focusable="true"
