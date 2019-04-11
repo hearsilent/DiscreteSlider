@@ -61,6 +61,7 @@ Setup **ValueLabel** in Java
 ```java
 mSlider.setValueLabelTextColor(Color.WHITE);
 mSlider.setValueLabelTextSize(Utils.convertSpToPixel(16, this));
+// Customize value label's text by `setValueLabelFormatter`
 mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 
     @Override
@@ -98,6 +99,17 @@ mSlider.setMode(DiscreteSlider.MODE_RANGE);
 Setup **Mode** in Xml
 ```xml
 app:mode="range"
+```
+   
+Setup ***Click to Move* in Java (By default is `false`)
+```java
+mSlider.setClickable(true);
+```
+   
+Setup ***Click to Move* in Xml (By default is `false`)
+```xml
+android:clickable="true"
+android:focusable="true"
 ```
    
 ## Compatibility

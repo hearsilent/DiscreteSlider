@@ -11,6 +11,8 @@
         android:id="@+id/discreteSlider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         app:count="21"
@@ -18,8 +20,6 @@
         app:leftProgress="5"
         app:mode="range"
         app:rightProgress="10"
-        app:valueLabelTextColor="#FFF"
-        app:valueLabelTextSize="16sp"
         app:thumbColor="@color/colorAccent"
         app:thumbPressedColor="#1FD81B60"
         app:thumbRadius="6dp"
@@ -28,6 +28,8 @@
         app:tickMarkInactiveColor="#1FD81B60"
         app:tickMarkPatterns="dot,dash"
         app:trackColor="@color/colorAccent"
-        app:trackWidth="4dp" />
+        app:trackWidth="4dp"
+        app:valueLabelTextColor="#FFF"
+        app:valueLabelTextSize="16sp" />
 
 </LinearLayout>
