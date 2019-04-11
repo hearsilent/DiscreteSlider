@@ -391,8 +391,9 @@ public class DiscreteSlider extends View {
         return isEnabled() && handleTouchEvent(event);
     }
 
-    public boolean handleTouchEvent(MotionEvent event) {
-        if (mCount == 0) {
+    private boolean handleTouchEvent(MotionEvent event) {
+        if (mCount < 2) {
+            mMoveDetector.onTouchEvent(event);
             return true;
         }
         float width = mWidth - mTrackWidth;
@@ -433,9 +434,13 @@ public class DiscreteSlider extends View {
                                 x;
                 mMaxOffsetX = (getPaddingLeft() + width + mRadius) - x;
                 mPressedPosition = mPaddingPosition;
+            } else if (!isClickable()) {
+                mPaddingPosition = -1;
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             if (mPaddingPosition == -1) {
+                mOffsetX = 0;
+                mMoveDetector.onTouchEvent(event);
                 return true;
             }
             if (mPaddingPosition != mLeftProgress && mPaddingPosition != mRightProgress) {
@@ -619,6 +624,8 @@ public class DiscreteSlider extends View {
                     }
                 });
                 animator.start();
+            } else {
+                mOffsetX = 0;
             }
 
             mPaddingPosition = -1;
