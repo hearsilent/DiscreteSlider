@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -26,6 +27,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import hearsilent.discreteslider.libs.MoveGestureDetector;
 import hearsilent.discreteslider.libs.Utils;
@@ -36,6 +38,7 @@ public class DiscreteSlider extends View {
     public static final int MODE_RANGE = 1;
 
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private RectF mRectF = new RectF();
 
     private float mOffsetX = 0f;
     private float mMinOffsetX, mMaxOffsetX;
@@ -287,7 +290,7 @@ public class DiscreteSlider extends View {
         invalidate();
     }
 
-    public void setValueLabelFormatter(ValueLabelFormatter formatter) {
+    public void setValueLabelFormatter(@NonNull ValueLabelFormatter formatter) {
         mValueLabelFormatter = formatter;
     }
 
@@ -355,14 +358,16 @@ public class DiscreteSlider extends View {
         mInactiveTrackPath.reset();
         if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
             if (mTickMarkPatterns.get(0) instanceof Dot) {
-                mInactiveTrackPath.arcTo(left, top, left + mTrackWidth, bottom, 90, 180, true);
+                mRectF.set(left, top, left + mTrackWidth, bottom);
+                mInactiveTrackPath.arcTo(mRectF, 90, 180, true);
             } else {
                 mInactiveTrackPath.moveTo(left, bottom);
                 mInactiveTrackPath.lineTo(left, top);
             }
             if (mTickMarkPatterns.get((mCount - 1) % mTickMarkPatterns.size()) instanceof Dot) {
                 mInactiveTrackPath.lineTo(right - radius, top);
-                mInactiveTrackPath.arcTo(right - mTrackWidth, top, right, bottom, -90, 180, true);
+                mRectF.set(right - mTrackWidth, top, right, bottom);
+                mInactiveTrackPath.arcTo(mRectF, -90, 180, true);
             } else {
                 mInactiveTrackPath.lineTo(right, top);
                 mInactiveTrackPath.lineTo(right, bottom);
@@ -374,8 +379,8 @@ public class DiscreteSlider extends View {
             }
             mInactiveTrackPath.close();
         } else {
-            mInactiveTrackPath
-                    .addRoundRect(left, top, right, bottom, radius, radius, Path.Direction.CW);
+            mRectF.set(left, top, right, bottom);
+            mInactiveTrackPath.addRoundRect(mRectF, radius, radius, Path.Direction.CW);
         }
     }
 
@@ -565,8 +570,8 @@ public class DiscreteSlider extends View {
 
                 float value = mValueLabelAnimValue;
                 if (mValueLabelAnimator != null) {
-                    mValueLabelAnimator.pause();
                     value = mValueLabelAnimator.getAnimatedFraction();
+                    mValueLabelAnimator.cancel();
                 }
 
                 if (value > 0) {
@@ -676,22 +681,21 @@ public class DiscreteSlider extends View {
         if (mMode != MODE_NORMAL && mRightProgress != -1) {
             float offsetLeft = offsetRight;
             offsetRight = (mPaddingPosition == mRightProgress ? mOffsetX : 0);
-            canvas.drawRoundRect(
-                    getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius + offsetLeft,
+            mRectF.set(getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius + offsetLeft,
                     (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
                     getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
                             offsetRight,
-                    (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth,
-                    mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
+                    (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth);
+            canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
         } else {
             if (mTickMarkPatterns == null || mTickMarkPatterns.size() == 0 ||
                     mTickMarkPatterns.get(0) instanceof Dot) {
-                canvas.drawRoundRect(getPaddingLeft() + mRadius - mTrackWidth / 2f,
+                mRectF.set(getPaddingLeft() + mRadius - mTrackWidth / 2f,
                         (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
                         getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
                                 offsetRight,
-                        (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth,
-                        mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
+                        (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth);
+                canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
             } else {
                 canvas.drawRect(getPaddingLeft() + mRadius,
                         (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
@@ -842,12 +846,14 @@ public class DiscreteSlider extends View {
         }
 
         mValueLabelPath.reset();
-        mValueLabelPath.arcTo(cx - r1, cy1 - r1, cx + r1, cy1 + r1, 135, 270, true);
+        mRectF.set(cx - r1, cy1 - r1, cx + r1, cy1 + r1);
+        mValueLabelPath.arcTo(mRectF, 135, 270, true);
         mValueLabelPath.quadTo(cx - Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue,
                 cy1 + r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue,
                 cx + r2 * (float) Math.cos(Math.toRadians(-45)),
                 cy2 + r2 * (float) Math.sin(Math.toRadians(-45)));
-        mValueLabelPath.arcTo(cx - r2, cy2 - r2, cx + r2, cy2 + r2, -45, 270, true);
+        mRectF.set(cx - r2, cy2 - r2, cx + r2, cy2 + r2);
+        mValueLabelPath.arcTo(mRectF, -45, 270, true);
         mValueLabelPath.quadTo(cx + Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue,
                 cy1 + r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue,
                 cx + r1 * (float) Math.cos(Math.toRadians(135)),

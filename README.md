@@ -111,10 +111,13 @@ Setup **Click to Move** in Xml (By default is `false`)
 android:clickable="true"
 android:focusable="true"
 ```
+
+## Notice
+Must set `clipChildren` to `false` in parent layout.
    
 ## Compatibility
 
-Android LOLLIPOP 5.0+
+Android ICE CREAM SANDWICH 4.0+
 
 ## Credits
 
