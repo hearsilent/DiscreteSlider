@@ -14,19 +14,26 @@ DiscreteSlider tries to offer you the slider with value label as shown in the [M
 <img src="https://raw.githubusercontent.com/hearsilent/DiscreteSlider/master/screenshots/device-2019-04-10-215451.png" height="500">
 
 ## Setup
-
+   
 The easiest way to add the **DiscreteSlider** library to your project is by adding it as a dependency to your build.gradle
-
+   
+**Step 1.** Add the JitPack repository to your build file
 ```gradle
-repositories {
-    maven { url "https://jitpack.io" }
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
 }
-
+```
+   
+**Step 2.** Add the dependency
+```gradle
 dependencies {
     implementation 'com.github.hearsilent:DiscreteSlider:1.0.1'
 }
 ```
-
+   
 ## Usage
    
 Setup **Track** in Java
