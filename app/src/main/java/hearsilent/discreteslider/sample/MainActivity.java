@@ -58,7 +58,13 @@ public class MainActivity extends AppCompatActivity {
 
         mSlider.setLeftProgress(5);
 
-        mSlider.setOnValueChangedListner(new DiscreteSlider.OnValueChangedListener() {
+        mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
+            @Override
+            public void onValueChanged(int progress) {
+                super.onValueChanged(progress);
+                Log.i("DiscreteSlider", "Progress: " + progress);
+            }
+
             @Override
             public void onValueChanged(int leftProgress, int rightProgress) {
                 super.onValueChanged(leftProgress, rightProgress);
@@ -66,6 +72,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-       mSlider.setClickable(true);
+        mSlider.setClickable(true);
     }
 }

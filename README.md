@@ -80,6 +80,7 @@ app:valueLabelTextSize="16sp
 Setup **Progress** in Java
 ```java
 mSlider.setCount(21);
+mSlider.setProgress(5); // The same as `setLeftProgress`.
 mSlider.setLeftProgress(5);
 mSlider.setRightProgress(10); // Only can call in range mode.
 ```
@@ -89,6 +90,28 @@ Setup **Progress** in Xml
 app:count="21"
 app:leftProgress="5"
 app:rightProgress="5"
+```
+   
+Get **Progress** in Java
+```java
+mSlider.getProgress(); // The same as `getLeftProgress`.
+mSlider.getLeftProgress();
+mSlider.getRightProgress();
+mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
+    @Override
+    // Only called when mode is {@Code MODE_NORMAL}
+    public void onValueChanged(int progress) {
+        super.onValueChanged(progress);
+        Log.i("DiscreteSlider", "Progress: " + progress);
+    }
+
+    @Override
+    // Only called when mode is {@Code MODE_RANGE}
+    public void onValueChanged(int leftProgress, int rightProgress) {
+        super.onValueChanged(leftProgress, rightProgress);
+        Log.i("DiscreteSlider", "LeftProgress: " + leftProgress + ", RightProgress: " + rightProgress);
+    }
+});
 ```
    
 Setup **Mode** in Java
@@ -111,7 +134,7 @@ Setup **Click to Move** in Xml (By default is `false`)
 android:clickable="true"
 android:focusable="true"
 ```
-
+   
 ## Notice
 Must set `clipChildren` to `false` in parent layout.
    

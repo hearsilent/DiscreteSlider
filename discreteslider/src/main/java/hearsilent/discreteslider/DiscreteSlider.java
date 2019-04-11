@@ -343,7 +343,7 @@ public class DiscreteSlider extends View {
         }
     }
 
-    public void setOnValueChangedListner(OnValueChangedListener listener) {
+    public void setOnValueChangedListener(OnValueChangedListener listener) {
         mListener = listener;
     }
 
