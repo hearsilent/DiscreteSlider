@@ -13,6 +13,9 @@ DiscreteSlider tries to offer you the slider with value label as shown in the [M
 ### Range Mode
 <img src="https://raw.githubusercontent.com/hearsilent/DiscreteSlider/master/screenshots/device-2019-04-10-215451.png" height="500">
 
+### Vertical Orientation
+<img src="https://raw.githubusercontent.com/hearsilent/DiscreteSlider/master/screenshots/device-2019-04-15-221115.png" height="500">
+
 ## Setup
    
 The easiest way to add the **DiscreteSlider** library to your project is by adding it as a dependency to your build.gradle
@@ -105,23 +108,23 @@ app:valueLabelGravity="top"
 Setup **Progress** in Java
 ```java
 mSlider.setCount(21);
-mSlider.setProgress(5); // The same as `setLeftProgress`.
-mSlider.setLeftProgress(5);
-mSlider.setRightProgress(10); // Only can call in range mode.
+mSlider.setProgress(5); // The same as `setMinProgress`.
+mSlider.setMinProgress(5);
+mSlider.setMaxProgress(10); // Only can call in range mode.
 ```
    
 Setup **Progress** in Xml
 ```xml
 app:count="21"
-app:leftProgress="5"
-app:rightProgress="5"
+app:minProgress="5"
+app:maxProgress="5"
 ```
    
 Get **Progress** in Java
 ```java
-mSlider.getProgress(); // The same as `getLeftProgress`.
-mSlider.getLeftProgress();
-mSlider.getRightProgress();
+mSlider.getProgress(); // The same as `getMinProgress`.
+mSlider.getMinProgress();
+mSlider.getMaxProgress();
 mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
     @Override
     // Only called when mode is {@Code MODE_NORMAL}
@@ -132,9 +135,9 @@ mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
 
     @Override
     // Only called when mode is {@Code MODE_RANGE}
-    public void onValueChanged(int leftProgress, int rightProgress) {
-        super.onValueChanged(leftProgress, rightProgress);
-        Log.i("DiscreteSlider", "LeftProgress: " + leftProgress + ", RightProgress: " + rightProgress);
+    public void onValueChanged(int minProgress, int maxProgress) {
+        super.onValueChanged(minProgress, maxProgress);
+        Log.i("DiscreteSlider", "MinProgress: " + minProgress + ", MaxProgress: " + maxProgress);
     }
 });
 ```
@@ -158,6 +161,11 @@ Setup **Click to Move** in Xml (By default is `false`)
 ```xml
 android:clickable="true"
 android:focusable="true"
+```
+
+Setup **Orientation** in Xml (By default is `horizontal`)
+```xml
+app:orientation="vertical"
 ```
    
 ## Notice

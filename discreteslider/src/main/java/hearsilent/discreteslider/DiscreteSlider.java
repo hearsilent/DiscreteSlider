@@ -34,6 +34,9 @@ import hearsilent.discreteslider.libs.Utils;
 
 public class DiscreteSlider extends View {
 
+    public static final int HORIZONTAL = 0;
+    public static final int VERTICAL = 1;
+
     public static final int TOP = 0;
     public static final int RIGHT = 90;
     public static final int BOTTOM = 180;
@@ -45,8 +48,8 @@ public class DiscreteSlider extends View {
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private RectF mRectF = new RectF();
 
-    private float mOffsetX = 0f;
-    private float mMinOffsetX, mMaxOffsetX;
+    private float mOffset = 0f;
+    private float mMinOffset, mMaxOffset;
 
     private float mRadius, mTrackWidth;
 
@@ -62,7 +65,7 @@ public class DiscreteSlider extends View {
     private int mValueLabelTextColor;
 
     private int mCount;
-    private int mLeftProgress, mRightProgress = -1;
+    private int mMinProgress, mMaxProgress = -1;
     private int mPaddingPosition = -1, mPressedPosition = -1;
 
     @Mode
@@ -77,9 +80,12 @@ public class DiscreteSlider extends View {
     private Path mValueLabelPath = new Path();
     private ValueAnimator mValueLabelAnimator;
     private float mValueLabelAnimValue = 0f;
+    @ValueLabelGravity
     private int mValueLabelGravity;
 
-    private float mWidth;
+    private float mLength;
+    @OrientationMode
+    private int mOrientation;
 
     private OnValueChangedListener mListener;
 
@@ -92,6 +98,12 @@ public class DiscreteSlider extends View {
     @IntDef({TOP, RIGHT, BOTTOM, LEFT})
     @Retention(RetentionPolicy.SOURCE)
     private @interface ValueLabelGravity {
+
+    }
+
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface OrientationMode {
 
     }
 
@@ -144,12 +156,12 @@ public class DiscreteSlider extends View {
             mCount = Math.max(mCount, 2);
             mMode = a.getInt(R.styleable.DiscreteSlider_mode, MODE_NORMAL);
 
-            mLeftProgress = a.getInt(R.styleable.DiscreteSlider_progress,
-                    a.getInt(R.styleable.DiscreteSlider_leftProgress, 0));
+            mMinProgress = a.getInt(R.styleable.DiscreteSlider_progress,
+                    a.getInt(R.styleable.DiscreteSlider_minProgress, 0));
             if (mMode == MODE_NORMAL) {
-                mRightProgress = -1;
+                mMaxProgress = -1;
             } else {
-                mRightProgress = a.getInt(R.styleable.DiscreteSlider_rightProgress, mCount - 1);
+                mMaxProgress = a.getInt(R.styleable.DiscreteSlider_maxProgress, mCount - 1);
             }
 
             if (a.hasValue(R.styleable.DiscreteSlider_tickMarkPatterns)) {
@@ -177,6 +189,14 @@ public class DiscreteSlider extends View {
                 generateInactiveTrackPath();
             }
 
+            mOrientation = a.getInt(R.styleable.DiscreteSlider_orientation, HORIZONTAL);
+
+            if (mOrientation == HORIZONTAL && (mValueLabelGravity != TOP && mValueLabelGravity != BOTTOM)) {
+                mValueLabelGravity = TOP;
+            } else if (mOrientation == VERTICAL && (mValueLabelGravity != RIGHT && mValueLabelGravity != LEFT)) {
+                mValueLabelGravity = RIGHT;
+            }
+
             setMode(mMode);
 
             a.recycle();
@@ -195,6 +215,8 @@ public class DiscreteSlider extends View {
             mValueLabelTextSize = Utils.convertSpToPixel(16, context);
             mValueLabelTextColor = Color.WHITE;
             mValueLabelGravity = TOP;
+
+            mOrientation = HORIZONTAL;
 
             mCount = 11;
         }
@@ -272,8 +294,10 @@ public class DiscreteSlider extends View {
     }
 
     public void setValueLabelGravity(@ValueLabelGravity int valueLabelGravity) {
-        if (valueLabelGravity != TOP && valueLabelGravity != RIGHT && valueLabelGravity != BOTTOM && valueLabelGravity != LEFT) {
-            throw new IllegalArgumentException("Value label gravity must be top|right|bottom|left.");
+        if (mOrientation == HORIZONTAL && valueLabelGravity != TOP && valueLabelGravity != BOTTOM) {
+            throw new IllegalArgumentException("Horizontal orientation value label gravity must be top or bottom.");
+        } else if (mOrientation == VERTICAL && valueLabelGravity != RIGHT && valueLabelGravity != LEFT) {
+            throw new IllegalArgumentException("Vertical orientation value label gravity must be right or left.");
         }
         mValueLabelGravity = valueLabelGravity;
         invalidate();
@@ -317,92 +341,126 @@ public class DiscreteSlider extends View {
     }
 
     public void setProgress(int progress) {
-        setLeftProgress(progress);
+        setMinProgress(progress);
     }
 
-    public void setLeftProgress(int progress) {
-        mLeftProgress = progress;
+    public void setMinProgress(int progress) {
+        mMinProgress = progress;
         checkProgressBound();
         invalidate();
     }
 
     public int getProgress() {
-        return getLeftProgress();
+        return getMinProgress();
     }
 
-    public int getLeftProgress() {
-        return mLeftProgress;
+    public int getMinProgress() {
+        return mMinProgress;
     }
 
-    public void setRightProgress(int progress) {
+    public void setMaxProgress(int progress) {
         if (mMode != MODE_RANGE) {
             throw new IllegalStateException("Set right progress must be range mode.");
         }
-        mRightProgress = progress;
+        mMaxProgress = progress;
         checkProgressBound();
         invalidate();
     }
 
     public int getRightProgress() {
-        return mRightProgress;
+        return mMaxProgress;
     }
 
     private void checkProgressBound() {
         if (mMode != MODE_NORMAL) {
-            if (mRightProgress == -1) {
-                mRightProgress = mCount - 1;
-            } else if (mRightProgress > mCount - 1) {
-                mRightProgress = mCount - 1;
+            if (mMaxProgress == -1) {
+                mMaxProgress = mCount - 1;
+            } else if (mMaxProgress > mCount - 1) {
+                mMaxProgress = mCount - 1;
             }
-            if (mLeftProgress >= mRightProgress) {
-                mLeftProgress = mRightProgress - 1;
+            if (mMinProgress >= mMaxProgress) {
+                mMinProgress = mMaxProgress - 1;
             }
         } else {
-            mRightProgress = -1;
-            if (mLeftProgress > mCount - 1) {
-                mLeftProgress = mCount - 1;
+            mMaxProgress = -1;
+            if (mMinProgress > mCount - 1) {
+                mMinProgress = mCount - 1;
             }
         }
     }
 
-    public void setOnValueChangedListener(OnValueChangedListener listener) {
+    public void setOnValueChangedListener(@Nullable OnValueChangedListener listener) {
         mListener = listener;
     }
 
     private void generateInactiveTrackPath() {
-        mWidth = getWidth() - getPaddingLeft() - getPaddingRight() - mRadius * 2 + mTrackWidth;
-        float left = getPaddingLeft() + mRadius - mTrackWidth / 2f;
-        float top = (getHeight() - mTrackWidth) / 2f + getPaddingTop();
-        float right = left + mWidth;
-        float bottom = top + mTrackWidth;
         float radius = mTrackWidth / 2f;
-
+        float left, top, right, bottom;
         mInactiveTrackPath.reset();
-        if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
-            if (mTickMarkPatterns.get(0) instanceof Dot) {
-                mRectF.set(left, top, left + mTrackWidth, bottom);
-                mInactiveTrackPath.arcTo(mRectF, 90, 180, true);
+        if (mOrientation == HORIZONTAL) {
+            mLength = getWidth() - getPaddingLeft() - getPaddingRight() - mRadius * 2 + mTrackWidth;
+            left = getPaddingLeft() + mRadius - radius;
+            top = ((getHeight() - getPaddingTop() - getPaddingBottom()) - mTrackWidth) / 2f + getPaddingTop();
+            right = left + mLength;
+            bottom = top + mTrackWidth;
+            if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
+                if (mTickMarkPatterns.get(0) instanceof Dot) {
+                    mRectF.set(left, top, left + mTrackWidth, bottom);
+                    mInactiveTrackPath.arcTo(mRectF, 90, 180, true);
+                } else {
+                    mInactiveTrackPath.moveTo(left, bottom);
+                    mInactiveTrackPath.lineTo(left, top);
+                }
+                if (mTickMarkPatterns.get((mCount - 1) % mTickMarkPatterns.size()) instanceof Dot) {
+                    mInactiveTrackPath.lineTo(right - radius, top);
+                    mRectF.set(right - mTrackWidth, top, right, bottom);
+                    mInactiveTrackPath.arcTo(mRectF, -90, 180, true);
+                } else {
+                    mInactiveTrackPath.lineTo(right, top);
+                    mInactiveTrackPath.lineTo(right, bottom);
+                }
+                if (mTickMarkPatterns.get(0) instanceof Dot) {
+                    mInactiveTrackPath.lineTo(left + radius, bottom);
+                } else {
+                    mInactiveTrackPath.lineTo(left, bottom);
+                }
+                mInactiveTrackPath.close();
             } else {
-                mInactiveTrackPath.moveTo(left, bottom);
-                mInactiveTrackPath.lineTo(left, top);
+                mRectF.set(left, top, right, bottom);
+                mInactiveTrackPath.addRoundRect(mRectF, radius, radius, Path.Direction.CW);
             }
-            if (mTickMarkPatterns.get((mCount - 1) % mTickMarkPatterns.size()) instanceof Dot) {
-                mInactiveTrackPath.lineTo(right - radius, top);
-                mRectF.set(right - mTrackWidth, top, right, bottom);
-                mInactiveTrackPath.arcTo(mRectF, -90, 180, true);
-            } else {
-                mInactiveTrackPath.lineTo(right, top);
-                mInactiveTrackPath.lineTo(right, bottom);
-            }
-            if (mTickMarkPatterns.get(0) instanceof Dot) {
-                mInactiveTrackPath.lineTo(left + radius, bottom);
-            } else {
-                mInactiveTrackPath.lineTo(left, bottom);
-            }
-            mInactiveTrackPath.close();
         } else {
-            mRectF.set(left, top, right, bottom);
-            mInactiveTrackPath.addRoundRect(mRectF, radius, radius, Path.Direction.CW);
+            mLength = getHeight() - getPaddingTop() - getPaddingBottom() - mRadius * 2 + mTrackWidth;
+            left = ((getWidth() - getPaddingLeft() - getPaddingRight()) - mTrackWidth) / 2f + getPaddingLeft();
+            top = getPaddingTop() + mRadius - radius;
+            right = left + mTrackWidth;
+            bottom = top + mLength;
+            if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
+                if (mTickMarkPatterns.get(0) instanceof Dot) {
+                    mRectF.set(left, top, right, top + mTrackWidth);
+                    mInactiveTrackPath.arcTo(mRectF, 180, 180, true);
+                } else {
+                    mInactiveTrackPath.moveTo(left, top);
+                    mInactiveTrackPath.lineTo(right, top);
+                }
+                if (mTickMarkPatterns.get((mCount - 1) % mTickMarkPatterns.size()) instanceof Dot) {
+                    mInactiveTrackPath.lineTo(right, bottom - radius);
+                    mRectF.set(left, bottom - mTrackWidth, right, bottom);
+                    mInactiveTrackPath.arcTo(mRectF, 0, 180, true);
+                } else {
+                    mInactiveTrackPath.lineTo(right, bottom);
+                    mInactiveTrackPath.lineTo(left, bottom);
+                }
+                if (mTickMarkPatterns.get(0) instanceof Dot) {
+                    mInactiveTrackPath.lineTo(left, top + radius);
+                } else {
+                    mInactiveTrackPath.lineTo(left, top);
+                }
+                mInactiveTrackPath.close();
+            } else {
+                mRectF.set(left, top, right, bottom);
+                mInactiveTrackPath.addRoundRect(mRectF, radius, radius, Path.Direction.CW);
+            }
         }
     }
 
@@ -423,74 +481,71 @@ public class DiscreteSlider extends View {
             mMoveDetector.onTouchEvent(event);
             return true;
         }
-        float width = mWidth - mTrackWidth;
+        float length = mLength - mTrackWidth;
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            mOffsetX = 0;
-            float x = event.getX();
-            if (mRightProgress == -1 && mMode == MODE_NORMAL) {
-                float cx = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius;
-                if (cx - mRadius * 3.5 <= x && x <= cx + mRadius * 3.5) {
-                    mPaddingPosition = mLeftProgress;
+            mOffset = 0;
+            float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
+            if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
+                float c = getPosition(length, mMinProgress, false);
+                if (c - mRadius * 3.5 <= p && p <= c + mRadius * 3.5) {
+                    mPaddingPosition = mMinProgress;
                 }
             } else {
-                float cx1 = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius;
-                float cx2 = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius;
-                if (cx1 - mRadius * 3.5 <= x && x <= cx1 + mRadius * 3.5) {
-                    mPaddingPosition = mLeftProgress;
-                } else if (cx2 - mRadius * 3.5 <= x && x <= cx2 + mRadius * 3.5) {
-                    mPaddingPosition = mRightProgress;
+                float c1 = getPosition(length, mMinProgress, false);
+                float c2 = getPosition(length, mMaxProgress, false);
+                if (c1 - mRadius * 3.5 <= p && p <= c1 + mRadius * 3.5) {
+                    mPaddingPosition = mMinProgress;
+                } else if (c2 - mRadius * 3.5 <= p && p <= c2 + mRadius * 3.5) {
+                    mPaddingPosition = mMaxProgress;
                 }
             }
             if (mPaddingPosition == -1) {
-                mPaddingPosition = getClosestPosition(x, width);
+                mPaddingPosition = (int) getClosestPosition(p, length)[0];
             }
 
-            x = getPaddingLeft() + width / (mCount - 1) * mPaddingPosition + mRadius;
-            if (mPaddingPosition == mLeftProgress) {
-                mMinOffsetX = (getPaddingLeft() + mRadius) - x;
-                if (mRightProgress != -1 && mMode == MODE_RANGE) {
-                    mMaxOffsetX = (getPaddingLeft() + width / (mCount - 1) * (mRightProgress - 1) +
-                            mRadius) - x;
+            p = getPosition(length, mPaddingPosition, false);
+            if (mPaddingPosition == mMinProgress) {
+                mMinOffset = getPosition(length, 0, false) - p;
+                if (mMaxProgress != -1 && mMode == MODE_RANGE) {
+                    mMaxOffset = getPosition(length, mMaxProgress - 1, false) - p;
                 } else {
-                    mMaxOffsetX = (getPaddingLeft() + width + mRadius) - x;
+                    mMaxOffset = getPosition(length, mCount - 1, false) - p;
                 }
                 mPressedPosition = mPaddingPosition;
-            } else if (mPaddingPosition == mRightProgress && mMode != MODE_NORMAL) {
-                mMinOffsetX =
-                        (getPaddingLeft() + width / (mCount - 1) * (mLeftProgress + 1) + mRadius) -
-                                x;
-                mMaxOffsetX = (getPaddingLeft() + width + mRadius) - x;
+            } else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+                mMinOffset = getPosition(length, mMinProgress + 1, false) - p;
+                mMaxOffset = getPosition(length, mCount - 1, false) - p;
                 mPressedPosition = mPaddingPosition;
             } else if (!isClickable()) {
                 mPaddingPosition = -1;
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
             if (mPaddingPosition == -1) {
-                mOffsetX = 0;
+                mOffset = 0;
                 mMoveDetector.onTouchEvent(event);
                 return true;
             }
-            if (mPaddingPosition != mLeftProgress && mPaddingPosition != mRightProgress) {
-                float x = event.getX();
-                final int position = getClosestPosition(x, width);
+            if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress) {
+                float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
+                final int position = (int) getClosestPosition(p, length)[0];
                 if (position == mPaddingPosition) {
-                    if (mRightProgress == -1 && mMode == MODE_NORMAL) {
-                        mPaddingPosition = mLeftProgress;
+                    if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
+                        mPaddingPosition = mMinProgress;
                     } else {
-                        if (Math.abs(mLeftProgress - position) <=
-                                Math.abs(mRightProgress - position)) {
-                            mPaddingPosition = mLeftProgress;
+                        if (Math.abs(mMinProgress - position) <=
+                                Math.abs(mMaxProgress - position)) {
+                            mPaddingPosition = mMinProgress;
                         } else {
-                            mPaddingPosition = mRightProgress;
+                            mPaddingPosition = mMaxProgress;
                         }
                     }
 
                     if (mListener != null) {
-                        if (mRightProgress != -1 && mMode != MODE_NORMAL) {
-                            if (mPaddingPosition == mLeftProgress) {
-                                mListener.onValueChanged(position, mRightProgress);
+                        if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+                            if (mPaddingPosition == mMinProgress) {
+                                mListener.onValueChanged(position, mMaxProgress);
                             } else {
-                                mListener.onValueChanged(mLeftProgress, position);
+                                mListener.onValueChanged(mMinProgress, position);
                             }
                         } else {
                             mListener.onValueChanged(position);
@@ -499,15 +554,15 @@ public class DiscreteSlider extends View {
 
                     setEnabled(false);
 
-                    mOffsetX = 0;
-                    float dis = width / (mCount - 1) * (position - mPaddingPosition);
-                    ValueAnimator animator = ValueAnimator.ofFloat(mOffsetX, mOffsetX + dis);
+                    mOffset = 0;
+                    float dis = length / (mCount - 1) * (position - mPaddingPosition);
+                    ValueAnimator animator = ValueAnimator.ofFloat(mOffset, mOffset + dis);
                     animator.setInterpolator(new AccelerateInterpolator());
                     animator.setDuration(100);
                     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
-                            mOffsetX = (float) animation.getAnimatedValue();
+                            mOffset = (float) animation.getAnimatedValue();
                             invalidate();
                         }
                     });
@@ -516,11 +571,11 @@ public class DiscreteSlider extends View {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            mOffsetX = 0;
-                            if (mPaddingPosition == mLeftProgress) {
-                                mLeftProgress = position;
-                            } else if (mPaddingPosition == mRightProgress && mMode != MODE_NORMAL) {
-                                mRightProgress = position;
+                            mOffset = 0;
+                            if (mPaddingPosition == mMinProgress) {
+                                mMinProgress = position;
+                            } else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+                                mMaxProgress = position;
                             }
                             mPaddingPosition = -1;
                             setEnabled(true);
@@ -531,24 +586,17 @@ public class DiscreteSlider extends View {
                     animator.start();
                 }
             } else {
-                float x = getPaddingLeft() + width / (mCount - 1) * mPaddingPosition + mRadius +
-                        mOffsetX;
-                float dis = Float.MAX_VALUE;
-                int position = -1;
-                for (int i = 0; i < mCount; i++) {
-                    float _dis = (getPaddingLeft() + width / (mCount - 1) * i + mRadius) - x;
-                    if (Math.abs(_dis) < Math.abs(dis)) {
-                        dis = _dis;
-                        position = i;
-                    }
-                }
+                float p = getPosition(length, mPaddingPosition, true);
+                float[] closestPosition = getClosestPosition(p, length);
+                float dis = closestPosition[1];
+                int position = (int) closestPosition[0];
 
                 if (mListener != null) {
-                    if (mRightProgress != -1 && mMode != MODE_NORMAL) {
-                        if (mPaddingPosition == mLeftProgress) {
-                            mListener.onValueChanged(position, mRightProgress);
+                    if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+                        if (mPaddingPosition == mMinProgress) {
+                            mListener.onValueChanged(position, mMaxProgress);
                         } else {
-                            mListener.onValueChanged(mLeftProgress, position);
+                            mListener.onValueChanged(mMinProgress, position);
                         }
                     } else {
                         mListener.onValueChanged(position);
@@ -558,13 +606,13 @@ public class DiscreteSlider extends View {
                 setEnabled(false);
 
                 final int _position = position;
-                ValueAnimator animator = ValueAnimator.ofFloat(mOffsetX, mOffsetX + dis);
+                ValueAnimator animator = ValueAnimator.ofFloat(mOffset, mOffset + dis);
                 animator.setInterpolator(new AccelerateInterpolator());
-                animator.setDuration(Math.round(200 * (Math.abs(dis) / (width / (mCount - 1)))));
+                animator.setDuration(Math.round(200 * (Math.abs(dis) / (length / (mCount - 1)))));
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        mOffsetX = (float) animation.getAnimatedValue();
+                        mOffset = (float) animation.getAnimatedValue();
                         invalidate();
                     }
                 });
@@ -573,11 +621,11 @@ public class DiscreteSlider extends View {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
-                        mOffsetX = 0;
-                        if (mPaddingPosition == mLeftProgress) {
-                            mLeftProgress = _position;
-                        } else if (mPaddingPosition == mRightProgress && mMode != MODE_NORMAL) {
-                            mRightProgress = _position;
+                        mOffset = 0;
+                        if (mPaddingPosition == mMinProgress) {
+                            mMinProgress = _position;
+                        } else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+                            mMaxProgress = _position;
                         }
                         if (mValueLabelAnimator == null) {
                             mPaddingPosition = -1;
@@ -613,7 +661,7 @@ public class DiscreteSlider extends View {
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
                             mValueLabelAnimator = null;
-                            if (mOffsetX == 0) {
+                            if (mOffset == 0) {
                                 mPaddingPosition = -1;
                                 setEnabled(true);
                             }
@@ -626,16 +674,16 @@ public class DiscreteSlider extends View {
             }
             mPressedPosition = -1;
         } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-            if (mPaddingPosition == mLeftProgress || mPaddingPosition == mRightProgress) {
+            if (mPaddingPosition == mMinProgress || mPaddingPosition == mMaxProgress) {
                 setEnabled(false);
 
-                ValueAnimator animator = ValueAnimator.ofFloat(mOffsetX, 0);
+                ValueAnimator animator = ValueAnimator.ofFloat(mOffset, 0);
                 animator.setInterpolator(new AccelerateInterpolator());
                 animator.setDuration(100);
                 animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        mOffsetX = (float) animation.getAnimatedValue();
+                        mOffset = (float) animation.getAnimatedValue();
                         invalidate();
                     }
                 });
@@ -644,7 +692,7 @@ public class DiscreteSlider extends View {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
-                        mOffsetX = 0;
+                        mOffset = 0;
                         mPaddingPosition = -1;
                         setEnabled(true);
                         invalidate();
@@ -652,7 +700,7 @@ public class DiscreteSlider extends View {
                 });
                 animator.start();
             } else {
-                mOffsetX = 0;
+                mOffset = 0;
             }
 
             mPaddingPosition = -1;
@@ -679,9 +727,15 @@ public class DiscreteSlider extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
-                (int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth) + getPaddingTop() +
-                        getPaddingBottom());
+        if (mOrientation == HORIZONTAL) {
+            setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
+                    (int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth) + getPaddingTop() +
+                            getPaddingBottom());
+        } else {
+            setMeasuredDimension((int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth) + getPaddingLeft() +
+                            getPaddingRight(),
+                    getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
+        }
     }
 
     @Override
@@ -694,103 +748,134 @@ public class DiscreteSlider extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float width = mWidth - mTrackWidth;
+        float length = mLength - mTrackWidth;
         mPaint.setColor(mInactiveTrackColor);
         canvas.drawPath(mInactiveTrackPath, mPaint);
 
+        float min, max;
         mPaint.setColor(mTrackColor);
-        float offsetRight = (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
-        if (mMode != MODE_NORMAL && mRightProgress != -1) {
-            float offsetLeft = offsetRight;
-            offsetRight = (mPaddingPosition == mRightProgress ? mOffsetX : 0);
-            mRectF.set(getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius + offsetLeft,
-                    (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
-                    getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
-                            offsetRight,
-                    (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth);
-            canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
-        } else {
-            if (mTickMarkPatterns == null || mTickMarkPatterns.size() == 0 ||
-                    mTickMarkPatterns.get(0) instanceof Dot) {
-                mRectF.set(getPaddingLeft() + mRadius - mTrackWidth / 2f,
-                        (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
-                        getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                                offsetRight,
-                        (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth);
+        if (mOrientation == HORIZONTAL) {
+            float top = ((getHeight() - getPaddingTop() - getPaddingBottom()) - mTrackWidth) / 2f + getPaddingTop();
+            float bottom = ((getHeight() - getPaddingTop() - getPaddingBottom()) - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth;
+            if (mMode != MODE_NORMAL && mMaxProgress != -1) {
+                float left = min = getPosition(length, mMinProgress, true) - mTrackWidth / 2f;
+                float right = max = getPosition(length, mMaxProgress, true) + mTrackWidth / 2f;
+                mRectF.set(left, top, right, bottom);
                 canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
             } else {
-                canvas.drawRect(getPaddingLeft() + mRadius,
-                        (getHeight() - mTrackWidth) / 2f + getPaddingTop(),
-                        getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                                offsetRight,
-                        (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth, mPaint);
+                float left = min = getPosition(length, 0, false) - mTrackWidth / 2f;
+                float right = max = getPosition(length, mMinProgress, true) + mTrackWidth / 2f;
+                mRectF.set(left, top, right, bottom);
+                if (mTickMarkPatterns == null || mTickMarkPatterns.size() == 0 ||
+                        mTickMarkPatterns.get(0) instanceof Dot) {
+                    canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
+                } else {
+                    canvas.drawRect(mRectF, mPaint);
+                }
+            }
+        } else {
+            float left = ((getWidth() - getPaddingLeft() - getPaddingRight()) - mTrackWidth) / 2f + getPaddingLeft();
+            float right = ((getWidth() - getPaddingLeft() - getPaddingRight()) - mTrackWidth) / 2f + getPaddingLeft() + mTrackWidth;
+            if (mMode != MODE_NORMAL && mMaxProgress != -1) {
+                float top = min = getPosition(length, mMinProgress, true) - mTrackWidth / 2f;
+                float bottom = max = getPosition(length, mMaxProgress, true) + mTrackWidth / 2f;
+                mRectF.set(left, top, right, bottom);
+                canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
+            } else {
+                float top = min = getPosition(length, 0, false) - mTrackWidth / 2f;
+                float bottom = max = getPosition(length, mMinProgress, true) + mTrackWidth / 2f;
+                mRectF.set(left, top, right, bottom);
+                if (mTickMarkPatterns == null || mTickMarkPatterns.size() == 0 ||
+                        mTickMarkPatterns.get(0) instanceof Dot) {
+                    canvas.drawRoundRect(mRectF, mTrackWidth / 2f, mTrackWidth / 2f, mPaint);
+                } else {
+                    canvas.drawRect(mRectF, mPaint);
+                }
             }
         }
 
-        float cy = getHeight() / 2f + (getPaddingTop() - getPaddingBottom());
+        float cx = (getWidth() - getPaddingLeft() - getPaddingRight()) / 2f + getPaddingLeft();
+        float cy = (getHeight() - getPaddingTop() - getPaddingBottom()) / 2f + getPaddingTop();
 
         if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
-            float left, right;
-            if (mRightProgress != -1 && mMode != MODE_NORMAL) {
-                left = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                        (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
-                right = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
-                        (mPaddingPosition == mRightProgress ? mOffsetX : 0);
-            } else {
-                left = 0;
-                right = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                        (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
-            }
+            if (mOrientation == HORIZONTAL) {
+                for (int i = 0; i < mCount; i++) {
+                    Object pattern = mTickMarkPatterns.get(i % mTickMarkPatterns.size());
+                    cx = getPosition(length, i, false);
 
-            for (int i = 0; i < mCount; i++) {
-                Object pattern = mTickMarkPatterns.get(i % mTickMarkPatterns.size());
-                float cx = getPaddingLeft() + width / (mCount - 1) * i + mRadius;
+                    if (min <= cx && cx <= max) {
+                        mPaint.setColor(mTickMarkColor);
+                    } else {
+                        mPaint.setColor(mTickMarkInactiveColor);
+                    }
 
-                if (left <= cx && cx <= right) {
-                    mPaint.setColor(mTickMarkColor);
-                } else {
-                    mPaint.setColor(mTickMarkInactiveColor);
+                    if (pattern instanceof Dot) {
+                        canvas.drawCircle(cx, cy, mTrackWidth / 2f, mPaint);
+                    } else {
+                        float dashLength = ((Dash) pattern).length;
+                        canvas.drawRect(cx - dashLength / 2f,
+                                cy - mTrackWidth / 2f, cx + dashLength / 2f,
+                                cy + mTrackWidth / 2f,
+                                mPaint);
+                    }
                 }
+            } else {
+                for (int i = 0; i < mCount; i++) {
+                    Object pattern = mTickMarkPatterns.get(i % mTickMarkPatterns.size());
+                    cy = getPosition(length, i, false);
 
-                if (pattern instanceof Dot) {
-                    canvas.drawCircle(cx, cy, mTrackWidth / 2f, mPaint);
-                } else {
-                    float length = ((Dash) pattern).length;
-                    canvas.drawRect(cx - length / 2f,
-                            (getHeight() - mTrackWidth) / 2f + getPaddingTop(), cx + length / 2f,
-                            (getHeight() - mTrackWidth) / 2f + getPaddingTop() + mTrackWidth,
-                            mPaint);
+                    if (min <= cy && cy <= max) {
+                        mPaint.setColor(mTickMarkColor);
+                    } else {
+                        mPaint.setColor(mTickMarkInactiveColor);
+                    }
+
+                    if (pattern instanceof Dot) {
+                        canvas.drawCircle(cx, cy, mTrackWidth / 2f, mPaint);
+                    } else {
+                        float dashLength = ((Dash) pattern).length;
+                        canvas.drawRect(cx - mTrackWidth / 2f, cy - dashLength / 2f, cx + mTrackWidth / 2f, cy + dashLength / 2f, mPaint);
+                    }
                 }
             }
         }
 
         if (mPressedPosition != -1) {
             mPaint.setColor(mThumbPressedColor);
-            if (mPressedPosition == mLeftProgress) {
-                float cx = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                        (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
+            if (mPressedPosition == mMinProgress) {
+                if (mOrientation == HORIZONTAL) {
+                    cx = getPosition(length, mMinProgress, true);
+                } else {
+                    cy = getPosition(length, mMinProgress, true);
+                }
                 canvas.drawCircle(cx, cy, mRadius * 3.5f, mPaint);
-            } else if (mPressedPosition == mRightProgress && mMode != MODE_NORMAL) {
-                float cx = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
-                        (mPaddingPosition == mRightProgress ? mOffsetX : 0);
+            } else if (mPressedPosition == mMaxProgress && mMode != MODE_NORMAL) {
+                if (mOrientation == HORIZONTAL) {
+                    cx = getPosition(length, mMaxProgress, true);
+                } else {
+                    cy = getPosition(length, mMaxProgress, true);
+                }
                 canvas.drawCircle(cx, cy, mRadius * 3.5f, mPaint);
             }
         }
 
-        mPaint.setColor(mThumbColor);
-        float cx = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
-
-        float _cy = cy;
-        if (mValueLabelGravity == TOP) {
-            _cy -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
-            _cy = cy + (_cy - cy) * mValueLabelAnimValue;
-        } else if (mValueLabelGravity == BOTTOM) {
-            _cy += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
-            _cy = cy + (_cy - cy) * mValueLabelAnimValue;
+        if (mOrientation == HORIZONTAL) {
+            cx = getPosition(length, mMinProgress, true);
+        } else {
+            cy = getPosition(length, mMinProgress, true);
         }
-        if (mPaddingPosition == mLeftProgress && mPaddingPosition != -1) {
-            float _cx = cx;
+
+        float _cx = cx;
+        float _cy = cy;
+        if (mOrientation == HORIZONTAL) {
+            if (mValueLabelGravity == TOP) {
+                _cy -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                _cy = cy + (_cy - cy) * mValueLabelAnimValue;
+            } else if (mValueLabelGravity == BOTTOM) {
+                _cy += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                _cy = cy + (_cy - cy) * mValueLabelAnimValue;
+            }
+        } else {
             if (mValueLabelGravity == RIGHT) {
                 _cx += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
                 _cx = cx + (_cx - cx) * mValueLabelAnimValue;
@@ -798,31 +883,31 @@ public class DiscreteSlider extends View {
                 _cx -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
                 _cx = cx + (_cx - cx) * mValueLabelAnimValue;
             }
+        }
+        if (mPaddingPosition == mMinProgress && mPaddingPosition != -1) {
+            mPaint.setColor(mThumbColor);
             canvas.drawPath(mValueLabelPath, mPaint);
             canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
-            drawValueLabel(canvas, cx, cy, _cx, _cy, width);
+            drawValueLabel(canvas, cx, cy, _cx, _cy, length);
         }
 
         mPaint.setColor(mThumbColor);
         canvas.drawCircle(cx, cy, mRadius, mPaint);
 
-        if (mRightProgress != -1 && mMode != MODE_NORMAL) {
+        if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
             mPaint.setColor(mThumbColor);
-            cx = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
-                    (mPaddingPosition == mRightProgress ? mOffsetX : 0);
+            if (mOrientation == HORIZONTAL) {
+                cx = getPosition(length, mMaxProgress, true);
+                _cx = cx;
+            } else {
+                cy = getPosition(length, mMaxProgress, true);
+                _cy = cy;
+            }
 
-            if (mPaddingPosition == mRightProgress) {
-                float _cx = cx;
-                if (mValueLabelGravity == RIGHT) {
-                    _cx += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
-                    _cx = cx + (_cx - cx) * mValueLabelAnimValue;
-                } else if (mValueLabelGravity == LEFT) {
-                    _cx -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
-                    _cx = cx + (_cx - cx) * mValueLabelAnimValue;
-                }
+            if (mPaddingPosition == mMaxProgress) {
                 canvas.drawPath(mValueLabelPath, mPaint);
                 canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
-                drawValueLabel(canvas, cx, cy, _cx, _cy, width);
+                drawValueLabel(canvas, cx, cy, _cx, _cy, length);
             }
 
             mPaint.setColor(mThumbColor);
@@ -830,7 +915,7 @@ public class DiscreteSlider extends View {
         }
     }
 
-    private void drawValueLabel(Canvas canvas, float cx, float cy, float _cx, float _cy, float width) {
+    private void drawValueLabel(Canvas canvas, float cx, float cy, float _cx, float _cy, float length) {
         if (mValueLabelGravity == TOP && _cy + mRadius * 3 * mValueLabelAnimValue > cy - mRadius) {
             return;
         } else if (mValueLabelGravity == BOTTOM && _cy - mRadius * 3 * mValueLabelAnimValue < cy + mRadius) {
@@ -841,7 +926,12 @@ public class DiscreteSlider extends View {
             return;
         }
 
-        String label = mValueLabelFormatter.getLabel(getClosestPosition(_cx, width));
+        String label;
+        if (mOrientation == HORIZONTAL) {
+            label = mValueLabelFormatter.getLabel((int) getClosestPosition(cx, length)[0]);
+        } else {
+            label = mValueLabelFormatter.getLabel((int) getClosestPosition(cy, length)[0]);
+        }
         if (!TextUtils.isEmpty(label)) {
             mPaint.setTextSize(mValueLabelTextSize * mValueLabelAnimValue);
             mPaint.setColor(mValueLabelTextColor);
@@ -855,14 +945,18 @@ public class DiscreteSlider extends View {
 
         @Override
         public boolean onMove(MoveGestureDetector detector) {
-            if ((mPaddingPosition == mLeftProgress ||
-                    mPaddingPosition == mRightProgress && mMode != MODE_NORMAL) &&
+            if ((mPaddingPosition == mMinProgress ||
+                    mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) &&
                     mPaddingPosition != -1) {
                 PointF d = detector.getFocusDelta();
-                mOffsetX += d.x;
-                mOffsetX = Math.min(Math.max(mOffsetX, mMinOffsetX), mMaxOffsetX);
+                if (mOrientation == HORIZONTAL)
+                    mOffset += d.x;
+                else {
+                    mOffset += d.y;
+                }
+                mOffset = Math.min(Math.max(mOffset, mMinOffset), mMaxOffset);
                 generateValueLabelPath();
-                if (Math.abs(mOffsetX) >= mRadius * 2 && mValueLabelAnimator == null) {
+                if (Math.abs(mOffset) >= mRadius * 2 && mValueLabelAnimator == null) {
                     animValueLabel();
                 }
             }
@@ -871,22 +965,24 @@ public class DiscreteSlider extends View {
     }
 
     private void generateValueLabelPath() {
-        float r2 = mRadius, cx2, cy2 = getHeight() / 2f + (getPaddingTop() - getPaddingBottom());
-        float r1 = mRadius * 3, cx1, cy1 = cy2;
+        float r2 = mRadius, cx2, cy2;
+        float r1 = mRadius * 3, cx1, cy1;
 
-        float width = getWidth() - getPaddingLeft() - getPaddingRight() - mRadius * 2;
-
-        if (mPaddingPosition == mLeftProgress) {
-            cx2 = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
-                    (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
-        } else if (mRightProgress != -1 && mMode != MODE_NORMAL) {
-            cx2 = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
-                    (mPaddingPosition == mRightProgress ? mOffsetX : 0);
+        float length = mLength - mTrackWidth;
+        if (mPaddingPosition == mMinProgress || mMaxProgress != -1 && mMode != MODE_NORMAL) {
+            if (mOrientation == HORIZONTAL) {
+                cy2 = (getHeight() - getPaddingTop() - getPaddingBottom()) / 2f + getPaddingTop();
+                cx2 = getPosition(length, mPaddingPosition, true);
+            } else {
+                cy2 = getPosition(length, mPaddingPosition, true);
+                cx2 = (getWidth() - getPaddingLeft() - getPaddingRight()) / 2f + getPaddingLeft();
+            }
         } else {
             mValueLabelPath.reset();
             return;
         }
         cx1 = cx2;
+        cy1 = cy2;
 
         float ox1, oy1, ox2, oy2;
         if (mValueLabelGravity == TOP) {
@@ -949,17 +1045,27 @@ public class DiscreteSlider extends View {
         mValueLabelPath.close();
     }
 
-    private int getClosestPosition(float x, float width) {
+    private float[] getClosestPosition(float p, float length) {
         float dis = Float.MAX_VALUE;
         int position = -1;
         for (int i = 0; i < mCount; i++) {
-            float _dis = (getPaddingLeft() + width / (mCount - 1) * i + mRadius) - x;
+            float _dis = getPosition(length, i, false) - p;
             if (Math.abs(_dis) < Math.abs(dis)) {
                 dis = _dis;
                 position = i;
             }
         }
-        return position;
+        return new float[]{position, dis};
+    }
+
+    private float getPosition(float length, int progress, boolean withOffset) {
+        if (mOrientation == HORIZONTAL) {
+            return getPaddingLeft() + length / (mCount - 1) * progress + mRadius +
+                    (withOffset && mPaddingPosition == progress ? mOffset : 0);
+        } else {
+            return getPaddingTop() + length / (mCount - 1) * progress + mRadius +
+                    (withOffset && mPaddingPosition == progress ? mOffset : 0);
+        }
     }
 
     public static abstract class ValueLabelFormatter {
@@ -976,7 +1082,7 @@ public class DiscreteSlider extends View {
         }
 
         // Only called when mode is {@Code MODE_RANGE}
-        public void onValueChanged(int leftProgress, int rightProgress) {
+        public void onValueChanged(int minProgress, int maxProgress) {
 
         }
     }

@@ -34,8 +34,13 @@
         </attr>
 
         <attr name="progress" />
-        <attr name="leftProgress" format="integer" />
-        <attr name="rightProgress" format="integer" />
+        <attr name="minProgress" format="integer" />
+        <attr name="maxProgress" format="integer" />
+
+        <attr name="orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
 
     </declare-styleable>
 
