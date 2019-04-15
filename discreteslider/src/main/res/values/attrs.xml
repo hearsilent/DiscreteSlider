@@ -20,6 +20,12 @@
 
         <attr name="valueLabelTextColor" format="color" />
         <attr name="valueLabelTextSize" format="dimension" />
+        <attr name="valueLabelGravity" format="enum">
+            <enum name="top" value="0" />
+            <enum name="right" value="90" />
+            <enum name="bottom" value="180" />
+            <enum name="left" value="270" />
+        </attr>
 
         <attr name="count" format="integer" />
         <attr name="mode" format="enum">

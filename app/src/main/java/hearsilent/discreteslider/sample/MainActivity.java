@@ -2,7 +2,6 @@ package hearsilent.discreteslider.sample;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.Arrays;

@@ -34,6 +34,11 @@ import hearsilent.discreteslider.libs.Utils;
 
 public class DiscreteSlider extends View {
 
+    public static final int TOP = 0;
+    public static final int RIGHT = 90;
+    public static final int BOTTOM = 180;
+    public static final int LEFT = 270;
+
     public static final int MODE_NORMAL = 0;
     public static final int MODE_RANGE = 1;
 
@@ -72,6 +77,7 @@ public class DiscreteSlider extends View {
     private Path mValueLabelPath = new Path();
     private ValueAnimator mValueLabelAnimator;
     private float mValueLabelAnimValue = 0f;
+    private int mValueLabelGravity;
 
     private float mWidth;
 
@@ -80,6 +86,12 @@ public class DiscreteSlider extends View {
     @IntDef({MODE_NORMAL, MODE_RANGE})
     @Retention(RetentionPolicy.SOURCE)
     private @interface Mode {
+
+    }
+
+    @IntDef({TOP, RIGHT, BOTTOM, LEFT})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface ValueLabelGravity {
 
     }
 
@@ -126,6 +138,7 @@ public class DiscreteSlider extends View {
                     a.getColor(R.styleable.DiscreteSlider_valueLabelTextColor, Color.WHITE);
             mValueLabelTextSize = a.getDimension(R.styleable.DiscreteSlider_valueLabelTextSize,
                     Utils.convertSpToPixel(16, context));
+            mValueLabelGravity = a.getInt(R.styleable.DiscreteSlider_valueLabelGravity, TOP);
 
             mCount = a.getInt(R.styleable.DiscreteSlider_count, 11);
             mCount = Math.max(mCount, 2);
@@ -181,6 +194,7 @@ public class DiscreteSlider extends View {
 
             mValueLabelTextSize = Utils.convertSpToPixel(16, context);
             mValueLabelTextColor = Color.WHITE;
+            mValueLabelGravity = TOP;
 
             mCount = 11;
         }
@@ -254,6 +268,14 @@ public class DiscreteSlider extends View {
             throw new IllegalArgumentException("Value label text size must be a positive number.");
         }
         mValueLabelTextSize = valueLabelTextSize;
+        invalidate();
+    }
+
+    public void setValueLabelGravity(@ValueLabelGravity int valueLabelGravity) {
+        if (valueLabelGravity != TOP && valueLabelGravity != RIGHT && valueLabelGravity != BOTTOM && valueLabelGravity != LEFT) {
+            throw new IllegalArgumentException("Value label gravity must be top|right|bottom|left.");
+        }
+        mValueLabelGravity = valueLabelGravity;
         invalidate();
     }
 
@@ -759,14 +781,26 @@ public class DiscreteSlider extends View {
         float cx = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
                 (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
 
-        float cy1 = cy - mRadius - Utils.convertDpToPixel(16, getContext()) - mRadius * 3;
+        float _cy = cy;
+        if (mValueLabelGravity == TOP) {
+            _cy -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+            _cy = cy + (_cy - cy) * mValueLabelAnimValue;
+        } else if (mValueLabelGravity == BOTTOM) {
+            _cy += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+            _cy = cy + (_cy - cy) * mValueLabelAnimValue;
+        }
         if (mPaddingPosition == mLeftProgress && mPaddingPosition != -1) {
-            canvas.drawPath(mValueLabelPath, mPaint);
-            cy1 = cy + (cy1 - cy) * mValueLabelAnimValue;
-            canvas.drawCircle(cx, cy1, mRadius * 3 * mValueLabelAnimValue, mPaint);
-            if (cy1 + mRadius * 3 * mValueLabelAnimValue < cy - mRadius) {
-                drawValueLabel(canvas, cx, cy1, width);
+            float _cx = cx;
+            if (mValueLabelGravity == RIGHT) {
+                _cx += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                _cx = cx + (_cx - cx) * mValueLabelAnimValue;
+            } else if (mValueLabelGravity == LEFT) {
+                _cx -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                _cx = cx + (_cx - cx) * mValueLabelAnimValue;
             }
+            canvas.drawPath(mValueLabelPath, mPaint);
+            canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
+            drawValueLabel(canvas, cx, cy, _cx, _cy, width);
         }
 
         mPaint.setColor(mThumbColor);
@@ -778,10 +812,17 @@ public class DiscreteSlider extends View {
                     (mPaddingPosition == mRightProgress ? mOffsetX : 0);
 
             if (mPaddingPosition == mRightProgress) {
+                float _cx = cx;
+                if (mValueLabelGravity == RIGHT) {
+                    _cx += mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                    _cx = cx + (_cx - cx) * mValueLabelAnimValue;
+                } else if (mValueLabelGravity == LEFT) {
+                    _cx -= mRadius + Utils.convertDpToPixel(16, getContext()) + mRadius * 3;
+                    _cx = cx + (_cx - cx) * mValueLabelAnimValue;
+                }
                 canvas.drawPath(mValueLabelPath, mPaint);
-                cy1 = cy + (cy1 - cy) * mValueLabelAnimValue;
-                canvas.drawCircle(cx, cy1, mRadius * 3 * mValueLabelAnimValue, mPaint);
-                drawValueLabel(canvas, cx, cy1, width);
+                canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
+                drawValueLabel(canvas, cx, cy, _cx, _cy, width);
             }
 
             mPaint.setColor(mThumbColor);
@@ -789,14 +830,24 @@ public class DiscreteSlider extends View {
         }
     }
 
-    private void drawValueLabel(Canvas canvas, float cx, float cy, float width) {
-        String label = mValueLabelFormatter.getLabel(getClosestPosition(cx, width));
+    private void drawValueLabel(Canvas canvas, float cx, float cy, float _cx, float _cy, float width) {
+        if (mValueLabelGravity == TOP && _cy + mRadius * 3 * mValueLabelAnimValue > cy - mRadius) {
+            return;
+        } else if (mValueLabelGravity == BOTTOM && _cy - mRadius * 3 * mValueLabelAnimValue < cy + mRadius) {
+            return;
+        } else if (mValueLabelGravity == RIGHT && _cx - mRadius * 3 * mValueLabelAnimValue < cx + mRadius) {
+            return;
+        } else if (mValueLabelGravity == LEFT && _cx + mRadius * 3 * mValueLabelAnimValue > cx - mRadius) {
+            return;
+        }
+
+        String label = mValueLabelFormatter.getLabel(getClosestPosition(_cx, width));
         if (!TextUtils.isEmpty(label)) {
             mPaint.setTextSize(mValueLabelTextSize * mValueLabelAnimValue);
             mPaint.setColor(mValueLabelTextColor);
             mPaint.getTextBounds(label, 0, label.length(), mBounds);
-            canvas.drawText(label, cx - mBounds.width() / 2f - mBounds.left,
-                    cy + mBounds.height() / 2f - mBounds.bottom, mPaint);
+            canvas.drawText(label, _cx - mBounds.width() / 2f - mBounds.left,
+                    _cy + mBounds.height() / 2f - mBounds.bottom, mPaint);
         }
     }
 
@@ -820,46 +871,81 @@ public class DiscreteSlider extends View {
     }
 
     private void generateValueLabelPath() {
-        float cx;
-        float r2 = mRadius, cy2 = getHeight() / 2f + (getPaddingTop() - getPaddingBottom());
-        float r1 = mRadius * 3, cy1 = cy2 - mRadius - Utils.convertDpToPixel(16, getContext()) - r1;
+        float r2 = mRadius, cx2, cy2 = getHeight() / 2f + (getPaddingTop() - getPaddingBottom());
+        float r1 = mRadius * 3, cx1, cy1 = cy2;
 
         float width = getWidth() - getPaddingLeft() - getPaddingRight() - mRadius * 2;
 
         if (mPaddingPosition == mLeftProgress) {
-            cx = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
+            cx2 = getPaddingLeft() + width / (mCount - 1) * mLeftProgress + mRadius +
                     (mPaddingPosition == mLeftProgress ? mOffsetX : 0);
         } else if (mRightProgress != -1 && mMode != MODE_NORMAL) {
-            cx = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
+            cx2 = getPaddingLeft() + width / (mCount - 1) * mRightProgress + mRadius +
                     (mPaddingPosition == mRightProgress ? mOffsetX : 0);
         } else {
             mValueLabelPath.reset();
             return;
         }
+        cx1 = cx2;
 
-        cy1 = cy2 + (cy1 - cy2) * mValueLabelAnimValue;
+        float ox1, oy1, ox2, oy2;
+        if (mValueLabelGravity == TOP) {
+            cy1 -= r2 + Utils.convertDpToPixel(16, getContext()) + r1;
+            cy1 = cy2 + (cy1 - cy2) * mValueLabelAnimValue;
+            ox1 = -Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue;
+            ox2 = -ox1;
+            oy1 = oy2 = r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue;
+        } else if (mValueLabelGravity == BOTTOM) {
+            cy1 += r2 + Utils.convertDpToPixel(16, getContext()) + r1;
+            cy1 = cy2 + (cy1 - cy2) * mValueLabelAnimValue;
+            ox1 = Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue;
+            ox2 = -ox1;
+            oy1 = oy2 = -r1 - Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue;
+        } else if (mValueLabelGravity == RIGHT) {
+            cx1 += r2 + Utils.convertDpToPixel(16, getContext()) + r1;
+            cx1 = cx2 + (cx1 - cx2) * mValueLabelAnimValue;
+            ox1 = ox2 = -r1 - Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue;
+            oy1 = -Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue;
+            oy2 = -oy1;
+        } else {
+            cx1 -= r2 + Utils.convertDpToPixel(16, getContext()) + r1;
+            cx1 = cx2 + (cx1 - cx2) * mValueLabelAnimValue;
+            ox1 = ox2 = r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue;
+            oy1 = Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue;
+            oy2 = -oy1;
+        }
+
         r1 *= mValueLabelAnimValue;
 
-        if (cy1 + r1 >= cy2 - r2) {
+        if (mValueLabelGravity == TOP && cy1 + r1 >= cy2 - r2) {
+            mValueLabelPath.reset();
+            return;
+        } else if (mValueLabelGravity == BOTTOM && cy1 - r1 <= cy2 + r2) {
+            mValueLabelPath.reset();
+            return;
+        } else if (mValueLabelGravity == RIGHT && cx1 - r1 <= cx2 + r2) {
+            mValueLabelPath.reset();
+            return;
+        } else if (mValueLabelGravity == LEFT && cx1 + r1 >= cx2 - r2) {
             mValueLabelPath.reset();
             return;
         }
 
         mValueLabelPath.reset();
-        mRectF.set(cx - r1, cy1 - r1, cx + r1, cy1 + r1);
-        mValueLabelPath.arcTo(mRectF, 135, 270, true);
-        mValueLabelPath.quadTo(cx - Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue,
-                cy1 + r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue,
-                cx + r2 * (float) Math.cos(Math.toRadians(-45)),
-                cy2 + r2 * (float) Math.sin(Math.toRadians(-45)));
-        mRectF.set(cx - r2, cy2 - r2, cx + r2, cy2 + r2);
-        mValueLabelPath.arcTo(mRectF, -45, 270, true);
-        mValueLabelPath.quadTo(cx + Utils.convertDpToPixel(5, getContext()) * mValueLabelAnimValue,
-                cy1 + r1 + Utils.convertDpToPixel(8, getContext()) * mValueLabelAnimValue,
-                cx + r1 * (float) Math.cos(Math.toRadians(135)),
-                cy1 + r1 * (float) Math.sin(Math.toRadians(135)));
-        mValueLabelPath.moveTo(cx + r1 * (float) Math.cos(Math.toRadians(135)),
-                cy1 + r1 * (float) Math.sin(Math.toRadians(135)));
+        mRectF.set(cx1 - r1, cy1 - r1, cx1 + r1, cy1 + r1);
+        mValueLabelPath.arcTo(mRectF, 135 + mValueLabelGravity, 270, true);
+        mValueLabelPath.quadTo(cx1 + ox1,
+                cy1 + oy1,
+                cx2 + r2 * (float) Math.cos(Math.toRadians(-45 + mValueLabelGravity)),
+                cy2 + r2 * (float) Math.sin(Math.toRadians(-45 + mValueLabelGravity)));
+        mRectF.set(cx2 - r2, cy2 - r2, cx2 + r2, cy2 + r2);
+        mValueLabelPath.arcTo(mRectF, -45 + mValueLabelGravity, 270, true);
+        mValueLabelPath.quadTo(cx1 + ox2,
+                cy1 + oy2,
+                cx1 + r1 * (float) Math.cos(Math.toRadians(135 + mValueLabelGravity)),
+                cy1 + r1 * (float) Math.sin(Math.toRadians(135 + mValueLabelGravity)));
+        mValueLabelPath.moveTo(cx1 + r1 * (float) Math.cos(Math.toRadians(135 + mValueLabelGravity)),
+                cy1 + r1 * (float) Math.sin(Math.toRadians(135 + mValueLabelGravity)));
         mValueLabelPath.close();
     }
 

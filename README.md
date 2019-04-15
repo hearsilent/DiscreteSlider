@@ -84,6 +84,7 @@ Setup **ValueLabel** in Java
 ```java
 mSlider.setValueLabelTextColor(Color.WHITE);
 mSlider.setValueLabelTextSize(Utils.convertSpToPixel(16, this));
+mSlider.setValueLabelGravity(DiscreteSlider.TOP);
 // Customize value label's text by `setValueLabelFormatter`
 mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 
@@ -97,7 +98,8 @@ mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 Setup **ValueLabel** in Xml
 ```xml
 app:valueLabelTextColor="#FFF"
-app:valueLabelTextSize="16sp
+app:valueLabelTextSize="16sp"
+app:valueLabelGravity="top"
 ```
    
 Setup **Progress** in Java
