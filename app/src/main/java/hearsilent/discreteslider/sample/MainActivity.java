@@ -14,63 +14,66 @@ import hearsilent.discreteslider.libs.Utils;
 
 public class MainActivity extends AppCompatActivity {
 
-    private DiscreteSlider mSlider;
+	private DiscreteSlider mSlider;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
 
-        findView();
-        setUpView();
-    }
+		findView();
+		setUpView();
+	}
 
-    private void findView() {
-        mSlider = findViewById(R.id.discreteSlider);
-    }
+	private void findView() {
+		mSlider = findViewById(R.id.discreteSlider);
+	}
 
-    private void setUpView() {
-        mSlider.setTrackWidth(Utils.convertDpToPixel(4, this));
-        mSlider.setTrackColor(0xFFD81B60);
-        mSlider.setInactiveTrackColor(0x3DD81B60);
+	private void setUpView() {
+		mSlider.setTrackWidth(Utils.convertDpToPixel(4, this));
+		mSlider.setTrackColor(0xFFD81B60);
+		mSlider.setInactiveTrackColor(0x3DD81B60);
 
-        mSlider.setThumbRadius(Utils.convertDpToPixel(6, this));
-        mSlider.setThumbColor(0xFFD81B60);
-        mSlider.setThumbPressedColor(0x1FD81B60);
+		mSlider.setThumbRadius(Utils.convertDpToPixel(6, this));
+		mSlider.setThumbColor(0xFFD81B60);
+		mSlider.setThumbPressedColor(0x1FD81B60);
 
-        mSlider.setTickMarkColor(0x3DFFFFFF);
-        mSlider.setTickMarkInactiveColor(0x1FD81B60);
-        mSlider.setTickMarkPatterns(Arrays.asList(new Dot(), new Dash(Utils.convertDpToPixel(1, this))));
+		mSlider.setTickMarkColor(0x3DFFFFFF);
+		mSlider.setTickMarkInactiveColor(0x1FD81B60);
+		mSlider.setTickMarkPatterns(
+				Arrays.asList(new Dot(), new Dash(Utils.convertDpToPixel(1, this))));
 
-        mSlider.setValueLabelTextColor(Color.WHITE);
-        mSlider.setValueLabelTextSize(Utils.convertSpToPixel(16, this));
-        mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
+		mSlider.setValueLabelTextColor(Color.WHITE);
+		mSlider.setValueLabelTextSize(Utils.convertSpToPixel(16, this));
+		mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 
-            @Override
-            public String getLabel(int input) {
-                return Integer.toString(input);
-            }
-        });
+			@Override
+			public String getLabel(int input) {
+				return Integer.toString(input);
+			}
+		});
 
-        mSlider.setCount(21);
-        mSlider.setMode(DiscreteSlider.MODE_NORMAL);
+		mSlider.setCount(21);
+		mSlider.setMode(DiscreteSlider.MODE_NORMAL);
 
-        mSlider.setMinProgress(5);
+		mSlider.setMinProgress(5);
 
-        mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
-            @Override
-            public void onValueChanged(int progress) {
-                super.onValueChanged(progress);
-                Log.i("DiscreteSlider", "Progress: " + progress);
-            }
+		mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
 
-            @Override
-            public void onValueChanged(int minProgress, int maxProgress) {
-                super.onValueChanged(minProgress, maxProgress);
-                Log.i("DiscreteSlider", "MinProgress: " + minProgress + ", MaxProgress: " + maxProgress);
-            }
-        });
+			@Override
+			public void onValueChanged(int progress) {
+				super.onValueChanged(progress);
+				Log.i("DiscreteSlider", "Progress: " + progress);
+			}
 
-        mSlider.setClickable(true);
-    }
+			@Override
+			public void onValueChanged(int minProgress, int maxProgress) {
+				super.onValueChanged(minProgress, maxProgress);
+				Log.i("DiscreteSlider",
+						"MinProgress: " + minProgress + ", MaxProgress: " + maxProgress);
+			}
+		});
+
+		mSlider.setClickable(true);
+	}
 }
