@@ -7,7 +7,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 28
         versionCode 100020
-        versionName "1.0.2"
+        versionName "1.0.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 

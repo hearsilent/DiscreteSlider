@@ -81,6 +81,8 @@ public class DiscreteSlider extends View {
 	private float mValueLabelAnimValue = 0f;
 	@ValueLabelGravity private int mValueLabelGravity;
 
+	private boolean mSkipMove;
+
 	private float mLength;
 	@OrientationMode private int mOrientation;
 
@@ -486,6 +488,9 @@ public class DiscreteSlider extends View {
 		float length = mLength - mTrackWidth;
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			mOffset = 0;
+			mPaddingPosition = -1;
+			mSkipMove = false;
+
 			float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
 			if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
 				float c = getPosition(length, mMinProgress, false);
@@ -527,7 +532,8 @@ public class DiscreteSlider extends View {
 				mMoveDetector.onTouchEvent(event);
 				return true;
 			}
-			if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress) {
+			if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress &&
+					!mSkipMove) {
 				float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
 				final int position = (int) getClosestPosition(p, length)[0];
 				if (position == mPaddingPosition) {
@@ -766,9 +772,7 @@ public class DiscreteSlider extends View {
 		if (mOrientation == HORIZONTAL) {
 			float top = ((getHeight() - getPaddingTop() - getPaddingBottom()) - mTrackWidth) / 2f +
 					getPaddingTop();
-			float bottom =
-					((getHeight() - getPaddingTop() - getPaddingBottom()) - mTrackWidth) / 2f +
-							getPaddingTop() + mTrackWidth;
+			float bottom = top + mTrackWidth;
 			if (mMode != MODE_NORMAL && mMaxProgress != -1) {
 				float left = min = getPosition(length, mMinProgress, true) - mTrackWidth / 2f;
 				float right = max = getPosition(length, mMaxProgress, true) + mTrackWidth / 2f;
@@ -788,8 +792,7 @@ public class DiscreteSlider extends View {
 		} else {
 			float left = ((getWidth() - getPaddingLeft() - getPaddingRight()) - mTrackWidth) / 2f +
 					getPaddingLeft();
-			float right = ((getWidth() - getPaddingLeft() - getPaddingRight()) - mTrackWidth) / 2f +
-					getPaddingLeft() + mTrackWidth;
+			float right = left + mTrackWidth;
 			if (mMode != MODE_NORMAL && mMaxProgress != -1) {
 				float top = min = getPosition(length, mMinProgress, true) - mTrackWidth / 2f;
 				float bottom = max = getPosition(length, mMaxProgress, true) + mTrackWidth / 2f;
@@ -962,20 +965,22 @@ public class DiscreteSlider extends View {
 
 		@Override
 		public boolean onMove(MoveGestureDetector detector) {
+			PointF d = detector.getFocusDelta();
+			if (mOrientation == HORIZONTAL) {
+				mOffset += d.x;
+			} else {
+				mOffset += d.y;
+			}
 			if ((mPaddingPosition == mMinProgress ||
 					mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) &&
 					mPaddingPosition != -1) {
-				PointF d = detector.getFocusDelta();
-				if (mOrientation == HORIZONTAL) {
-					mOffset += d.x;
-				} else {
-					mOffset += d.y;
-				}
 				mOffset = Math.min(Math.max(mOffset, mMinOffset), mMaxOffset);
 				generateValueLabelPath();
 				if (Math.abs(mOffset) >= mRadius * 2 && mValueLabelAnimator == null) {
 					animValueLabel();
 				}
+			} else if (Math.abs(mOffset) >= mRadius * 3.5) {
+				mSkipMove = true;
 			}
 			return true;
 		}
