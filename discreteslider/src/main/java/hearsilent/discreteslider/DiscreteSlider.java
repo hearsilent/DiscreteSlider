@@ -370,7 +370,7 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
-	public int getRightProgress() {
+	public int getMaxProgress() {
 		return mMaxProgress;
 	}
 
