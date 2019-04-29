@@ -153,8 +153,8 @@ public class DiscreteSlider extends View {
 			mCount = Math.max(mCount, 2);
 			mMode = a.getInt(R.styleable.DiscreteSlider_mode, MODE_NORMAL);
 
-			mMinProgress = a.getInt(R.styleable.DiscreteSlider_progress,
-					a.getInt(R.styleable.DiscreteSlider_minProgress, 0));
+			mMinProgress = (int) a.getFloat(R.styleable.DiscreteSlider_progress,
+					a.getFloat(R.styleable.DiscreteSlider_minProgress, 0));
 			if (mMode == MODE_NORMAL) {
 				mMaxProgress = -1;
 			} else {
