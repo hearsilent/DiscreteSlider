@@ -3,6 +3,11 @@
 
 	<attr name="progress" format="integer"/>
 
+	<attr name="orientation" format="enum">
+		<enum name="horizontal" value="0"/>
+		<enum name="vertical" value="1"/>
+	</attr>
+
 	<declare-styleable name="DiscreteSlider">
 
 		<attr name="trackWidth" format="dimension"/>
@@ -37,10 +42,7 @@
 		<attr name="minProgress" format="integer"/>
 		<attr name="maxProgress" format="integer"/>
 
-		<attr name="orientation" format="enum">
-			<enum name="horizontal" value="0"/>
-			<enum name="vertical" value="1"/>
-		</attr>
+		<attr name="orientation"/>
 
 	</declare-styleable>
 
