@@ -684,6 +684,8 @@ public class DiscreteSlider extends View {
 						}
 					});
 					mValueLabelAnimator.start();
+				} else {
+					mValueLabelAnimator = null;
 				}
 			}
 			mPressedPosition = -1;
