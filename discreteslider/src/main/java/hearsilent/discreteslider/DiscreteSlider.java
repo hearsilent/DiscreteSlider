@@ -126,46 +126,46 @@ public class DiscreteSlider extends View {
 		if (attrs != null) {
 			TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscreteSlider);
 
-			mTrackWidth = a.getDimension(R.styleable.DiscreteSlider_trackWidth,
+			mTrackWidth = a.getDimension(R.styleable.DiscreteSlider_ds_trackWidth,
 					Utils.convertDpToPixel(4, getContext()));
 			mTrackWidth = Math.max(mTrackWidth, Float.MIN_VALUE);
-			mTrackColor = a.getColor(R.styleable.DiscreteSlider_trackColor, 0xff5123da);
+			mTrackColor = a.getColor(R.styleable.DiscreteSlider_ds_trackColor, 0xff5123da);
 			mInactiveTrackColor =
-					a.getColor(R.styleable.DiscreteSlider_inactiveTrackColor, 0x3d5123da);
+					a.getColor(R.styleable.DiscreteSlider_ds_inactiveTrackColor, 0x3d5123da);
 
-			mRadius = a.getDimension(R.styleable.DiscreteSlider_thumbRadius,
+			mRadius = a.getDimension(R.styleable.DiscreteSlider_ds_thumbRadius,
 					Utils.convertDpToPixel(6, getContext()));
 			mRadius = Math.max(mRadius, Float.MIN_VALUE);
-			mThumbColor = a.getColor(R.styleable.DiscreteSlider_thumbColor, 0xff5123da);
+			mThumbColor = a.getColor(R.styleable.DiscreteSlider_ds_thumbColor, 0xff5123da);
 			mThumbPressedColor =
-					a.getColor(R.styleable.DiscreteSlider_thumbPressedColor, 0x1f5123da);
+					a.getColor(R.styleable.DiscreteSlider_ds_thumbPressedColor, 0x1f5123da);
 
-			mTickMarkColor = a.getColor(R.styleable.DiscreteSlider_tickMarkColor, 0xff9972ed);
+			mTickMarkColor = a.getColor(R.styleable.DiscreteSlider_ds_tickMarkColor, 0xff9972ed);
 			mTickMarkInactiveColor =
-					a.getColor(R.styleable.DiscreteSlider_tickMarkInactiveColor, 0xff936ce2);
+					a.getColor(R.styleable.DiscreteSlider_ds_tickMarkInactiveColor, 0xff936ce2);
 
 			mValueLabelTextColor =
-					a.getColor(R.styleable.DiscreteSlider_valueLabelTextColor, Color.WHITE);
-			mValueLabelTextSize = a.getDimension(R.styleable.DiscreteSlider_valueLabelTextSize,
+					a.getColor(R.styleable.DiscreteSlider_ds_valueLabelTextColor, Color.WHITE);
+			mValueLabelTextSize = a.getDimension(R.styleable.DiscreteSlider_ds_valueLabelTextSize,
 					Utils.convertSpToPixel(16, context));
-			mValueLabelGravity = a.getInt(R.styleable.DiscreteSlider_valueLabelGravity, TOP);
+			mValueLabelGravity = a.getInt(R.styleable.DiscreteSlider_ds_valueLabelGravity, TOP);
 
-			mCount = a.getInt(R.styleable.DiscreteSlider_count, 11);
+			mCount = a.getInt(R.styleable.DiscreteSlider_ds_count, 11);
 			mCount = Math.max(mCount, 2);
-			mMode = a.getInt(R.styleable.DiscreteSlider_mode, MODE_NORMAL);
+			mMode = a.getInt(R.styleable.DiscreteSlider_ds_mode, MODE_NORMAL);
 
-			mMinProgress = (int) a.getFloat(R.styleable.DiscreteSlider_progress,
-					a.getFloat(R.styleable.DiscreteSlider_minProgress, 0));
+			mMinProgress = a.getInt(R.styleable.DiscreteSlider_ds_progress,
+					a.getInt(R.styleable.DiscreteSlider_ds_minProgress, 0));
 			if (mMode == MODE_NORMAL) {
 				mMaxProgress = -1;
 			} else {
-				mMaxProgress = a.getInt(R.styleable.DiscreteSlider_maxProgress, mCount - 1);
+				mMaxProgress = a.getInt(R.styleable.DiscreteSlider_ds_maxProgress, mCount - 1);
 			}
 
-			if (a.hasValue(R.styleable.DiscreteSlider_tickMarkPatterns)) {
-				String patterns = a.getString(R.styleable.DiscreteSlider_tickMarkPatterns);
+			if (a.hasValue(R.styleable.DiscreteSlider_ds_tickMarkPatterns)) {
+				String patterns = a.getString(R.styleable.DiscreteSlider_ds_tickMarkPatterns);
 				if (!TextUtils.isEmpty(patterns)) {
-					float length = a.getDimension(R.styleable.DiscreteSlider_tickMarkDashLength,
+					float length = a.getDimension(R.styleable.DiscreteSlider_ds_tickMarkDashLength,
 							Utils.convertDpToPixel(1, context));
 					mTickMarkPatterns = new ArrayList<>();
 					if (patterns.contains(",")) {
@@ -187,7 +187,7 @@ public class DiscreteSlider extends View {
 				generateInactiveTrackPath();
 			}
 
-			mOrientation = a.getInt(R.styleable.DiscreteSlider_orientation, HORIZONTAL);
+			mOrientation = a.getInt(R.styleable.DiscreteSlider_ds_orientation, HORIZONTAL);
 
 			if (mOrientation == HORIZONTAL &&
 					(mValueLabelGravity != TOP && mValueLabelGravity != BOTTOM)) {

@@ -1,48 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<attr name="progress" format="integer"/>
-
-	<attr name="orientation" format="enum">
-		<enum name="horizontal" value="0"/>
-		<enum name="vertical" value="1"/>
-	</attr>
-
 	<declare-styleable name="DiscreteSlider">
 
-		<attr name="trackWidth" format="dimension"/>
-		<attr name="trackColor" format="color"/>
-		<attr name="inactiveTrackColor" format="color"/>
+		<attr name="ds_trackWidth" format="dimension"/>
+		<attr name="ds_trackColor" format="color"/>
+		<attr name="ds_inactiveTrackColor" format="color"/>
 
-		<attr name="thumbRadius" format="dimension"/>
-		<attr name="thumbColor" format="color"/>
-		<attr name="thumbPressedColor" format="color"/>
+		<attr name="ds_thumbRadius" format="dimension"/>
+		<attr name="ds_thumbColor" format="color"/>
+		<attr name="ds_thumbPressedColor" format="color"/>
 
-		<attr name="tickMarkPatterns" format="string"/>
-		<attr name="tickMarkDashLength" format="dimension"/>
-		<attr name="tickMarkColor" format="color"/>
-		<attr name="tickMarkInactiveColor" format="color"/>
+		<attr name="ds_tickMarkPatterns" format="string"/>
+		<attr name="ds_tickMarkDashLength" format="dimension"/>
+		<attr name="ds_tickMarkColor" format="color"/>
+		<attr name="ds_tickMarkInactiveColor" format="color"/>
 
-		<attr name="valueLabelTextColor" format="color"/>
-		<attr name="valueLabelTextSize" format="dimension"/>
-		<attr name="valueLabelGravity" format="enum">
+		<attr name="ds_valueLabelTextColor" format="color"/>
+		<attr name="ds_valueLabelTextSize" format="dimension"/>
+		<attr name="ds_valueLabelGravity" format="enum">
 			<enum name="top" value="0"/>
 			<enum name="right" value="90"/>
 			<enum name="bottom" value="180"/>
 			<enum name="left" value="270"/>
 		</attr>
 
-		<attr name="count" format="integer"/>
-		<attr name="mode" format="enum">
+		<attr name="ds_count" format="integer"/>
+		<attr name="ds_mode" format="enum">
 			<enum name="normal" value="0"/>
 			<enum name="range" value="1"/>
 		</attr>
 
-		<attr name="progress"/>
-		<attr name="minProgress" format="integer"/>
-		<attr name="maxProgress" format="integer"/>
+		<attr name="ds_progress" format="integer"/>
 
-		<attr name="orientation"/>
+		<attr name="ds_minProgress" format="integer"/>
+		<attr name="ds_maxProgress" format="integer"/>
+
+		<attr name="ds_orientation" format="enum">
+			<enum name="horizontal" value="0"/>
+			<enum name="vertical" value="1"/>
+		</attr>
 
 	</declare-styleable>
 

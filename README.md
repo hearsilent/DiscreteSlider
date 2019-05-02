@@ -48,9 +48,9 @@ mSlider.setInactiveTrackColor(0x3DD81B60);
    
 Setup **Track** in Xml
 ```xml
-app:trackWidth="4dp"
-app:trackColor="#D81B60"
-app:inactiveTrackColor="#3DD81B60"
+app:ds_trackWidth="4dp"
+app:ds_trackColor="#D81B60"
+app:ds_inactiveTrackColor="#3DD81B60"
 ```
    
 Setup **Thumb** in Java
@@ -62,9 +62,9 @@ mSlider.setThumbPressedColor(0x1FD81B60);
    
 Setup **Thumb** in Xml
 ```xml
-app:thumbRadius="6dp"
-app:thumbColor="#D81B60"
-app:thumbPressedColor="#1FD81B60"
+app:ds_thumbRadius="6dp"
+app:ds_thumbColor="#D81B60"
+app:ds_thumbPressedColor="#1FD81B60"
 ```
    
 Setup **TickMark** in Java
@@ -76,11 +76,11 @@ mSlider.setTickMarkPatterns(Arrays.asList(new Dot(), new Dash(Utils.convertDpToP
    
 Setup **TickMark** in Xml
 ```xml
-app:tickMarkColor="#3DFFFFFF"
-app:tickMarkInactiveColor="#1FD81B60"
+app:ds_tickMarkColor="#3DFFFFFF"
+app:ds_tickMarkInactiveColor="#1FD81B60"
 <!-- Separated by commas, only accept `dot` or `dash`. You can also fill in "dot,dash,dash"-->
-app:tickMarkPatterns="dot,dash"
-app:tickMarkDashLength="1dp"
+app:ds_tickMarkPatterns="dot,dash"
+app:ds_tickMarkDashLength="1dp"
 ```
    
 Setup **ValueLabel** in Java
@@ -100,9 +100,9 @@ mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
 
 Setup **ValueLabel** in Xml
 ```xml
-app:valueLabelTextColor="#FFF"
-app:valueLabelTextSize="16sp"
-app:valueLabelGravity="top"
+app:ds_valueLabelTextColor="#FFF"
+app:ds_valueLabelTextSize="16sp"
+app:ds_valueLabelGravity="top"
 ```
    
 Setup **Progress** in Java
@@ -115,9 +115,9 @@ mSlider.setMaxProgress(10); // Only can call in range mode.
    
 Setup **Progress** in Xml
 ```xml
-app:count="21"
-app:minProgress="5"
-app:maxProgress="5"
+app:ds_count="21"
+app:ds_minProgress="5"
+app:ds_maxProgress="5"
 ```
    
 Get **Progress** in Java
@@ -149,7 +149,7 @@ mSlider.setMode(DiscreteSlider.MODE_RANGE);
    
 Setup **Mode** in Xml
 ```xml
-app:mode="range"
+app:ds_mode="range"
 ```
    
 Setup **Click to Move** in Java (By default is `false`)
@@ -165,7 +165,7 @@ android:focusable="true"
 
 Setup **Orientation** in Xml (By default is `horizontal`)
 ```xml
-app:orientation="vertical"
+app:ds_orientation="vertical"
 ```
    
 ## Notice
