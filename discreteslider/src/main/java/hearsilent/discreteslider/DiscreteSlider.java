@@ -18,6 +18,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -567,8 +568,8 @@ public class DiscreteSlider extends View {
 					mOffset = 0;
 					float dis = length / (mCount - 1) * (position - mPaddingPosition);
 					ValueAnimator animator = ValueAnimator.ofFloat(mOffset, mOffset + dis);
-					animator.setInterpolator(new AccelerateInterpolator());
-					animator.setDuration(100);
+					animator.setInterpolator(new DecelerateInterpolator(2.5f));
+					animator.setDuration(250);
 					animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 						@Override
@@ -618,8 +619,8 @@ public class DiscreteSlider extends View {
 
 				final int _position = position;
 				ValueAnimator animator = ValueAnimator.ofFloat(mOffset, mOffset + dis);
-				animator.setInterpolator(new AccelerateInterpolator());
-				animator.setDuration(Math.round(200 * (Math.abs(dis) / (length / (mCount - 1)))));
+				animator.setInterpolator(new DecelerateInterpolator(2.5f));
+				animator.setDuration(250);
 				animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 					@Override
@@ -659,6 +660,7 @@ public class DiscreteSlider extends View {
 				if (value > 0) {
 					mValueLabelAnimator = ValueAnimator.ofFloat(value, 0);
 					mValueLabelAnimator.setDuration(Math.round(250 * value));
+					mValueLabelAnimator.setInterpolator(new DecelerateInterpolator());
 					mValueLabelAnimator
 							.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
@@ -694,8 +696,8 @@ public class DiscreteSlider extends View {
 				setEnabled(false);
 
 				ValueAnimator animator = ValueAnimator.ofFloat(mOffset, 0);
-				animator.setInterpolator(new AccelerateInterpolator());
-				animator.setDuration(100);
+				animator.setInterpolator(new DecelerateInterpolator(2.5f));
+				animator.setDuration(250);
 				animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 					@Override
@@ -731,6 +733,7 @@ public class DiscreteSlider extends View {
 	private void animValueLabel() {
 		mValueLabelAnimator = ValueAnimator.ofFloat(0, 1);
 		mValueLabelAnimator.setDuration(250);
+		mValueLabelAnimator.setInterpolator(new AccelerateInterpolator());
 		mValueLabelAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
 			@Override
