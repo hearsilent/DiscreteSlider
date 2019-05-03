@@ -29,6 +29,7 @@
 		app:ds_tickMarkPatterns="dot,dash"
 		app:ds_trackColor="@color/colorAccent"
 		app:ds_trackWidth="4dp"
+		app:ds_valueLabelVisible="true"
 		app:ds_valueLabelTextColor="#FFF"
 		app:ds_valueLabelTextSize="16sp"/>
 

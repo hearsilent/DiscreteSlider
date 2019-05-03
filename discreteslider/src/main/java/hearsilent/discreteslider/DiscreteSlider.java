@@ -83,6 +83,7 @@ public class DiscreteSlider extends View {
 	private Matrix mValueLabelMatrix = new Matrix();
 	private float mValueLabelAnimValue = 0f;
 	@ValueLabelGravity private int mValueLabelGravity;
+	private boolean mValueLabelVisible = true;
 
 	private boolean mSkipMove;
 
@@ -149,6 +150,8 @@ public class DiscreteSlider extends View {
 			mValueLabelTextSize = a.getDimension(R.styleable.DiscreteSlider_ds_valueLabelTextSize,
 					Utils.convertSpToPixel(16, context));
 			mValueLabelGravity = a.getInt(R.styleable.DiscreteSlider_ds_valueLabelGravity, TOP);
+			mValueLabelVisible =
+					a.getBoolean(R.styleable.DiscreteSlider_ds_valueLabelVisible, true);
 
 			mCount = a.getInt(R.styleable.DiscreteSlider_ds_count, 11);
 			mCount = Math.max(mCount, 2);
@@ -342,6 +345,11 @@ public class DiscreteSlider extends View {
 
 	public void setValueLabelFormatter(@NonNull ValueLabelFormatter formatter) {
 		mValueLabelFormatter = formatter;
+	}
+
+	public void setValueLabelVisible(boolean visible) {
+		mValueLabelVisible = visible;
+		invalidate();
 	}
 
 	public void setProgress(int progress) {
@@ -909,7 +917,7 @@ public class DiscreteSlider extends View {
 				_cx = cx + (_cx - cx) * mValueLabelAnimValue * ratio;
 			}
 		}
-		if (mPaddingPosition == mMinProgress && mPaddingPosition != -1) {
+		if (mPaddingPosition == mMinProgress && mPaddingPosition != -1 && mValueLabelVisible) {
 			mPaint.setColor(mThumbColor);
 			canvas.drawPath(mValueLabelPath, mPaint);
 			canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
@@ -929,7 +937,7 @@ public class DiscreteSlider extends View {
 				_cy = cy;
 			}
 
-			if (mPaddingPosition == mMaxProgress) {
+			if (mPaddingPosition == mMaxProgress && mValueLabelVisible) {
 				canvas.drawPath(mValueLabelPath, mPaint);
 				canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
 				drawValueLabel(canvas, cx, cy, _cx, _cy, length);

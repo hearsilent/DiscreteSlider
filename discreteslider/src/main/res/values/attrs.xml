@@ -24,6 +24,7 @@
 			<enum name="bottom" value="180"/>
 			<enum name="left" value="270"/>
 		</attr>
+		<attr name="ds_valueLabelVisible" format="boolean"/>
 
 		<attr name="ds_count" format="integer"/>
 		<attr name="ds_mode" format="enum">
