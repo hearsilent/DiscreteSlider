@@ -758,14 +758,15 @@ public class DiscreteSlider extends View {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		if (mOrientation == HORIZONTAL) {
 			setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
-					(int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth) + getPaddingTop() +
-							getPaddingBottom());
+					getSize() + getPaddingTop() + getPaddingBottom());
 		} else {
-			setMeasuredDimension(
-					(int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth) + getPaddingLeft() +
-							getPaddingRight(),
+			setMeasuredDimension(getSize() + getPaddingLeft() + getPaddingRight(),
 					getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
 		}
+	}
+
+	public int getSize() {
+		return (int) Math.max(Math.ceil(mRadius * 2 * 3), mTrackWidth);
 	}
 
 	@Override
@@ -871,25 +872,6 @@ public class DiscreteSlider extends View {
 			}
 		}
 
-		if (mPressedPosition != -1) {
-			mPaint.setColor(mThumbPressedColor);
-			if (mPressedPosition == mMinProgress) {
-				if (mOrientation == HORIZONTAL) {
-					cx = getPosition(length, mMinProgress, true);
-				} else {
-					cy = getPosition(length, mMinProgress, true);
-				}
-				canvas.drawCircle(cx, cy, mRadius * 3.5f, mPaint);
-			} else if (mPressedPosition == mMaxProgress && mMode != MODE_NORMAL) {
-				if (mOrientation == HORIZONTAL) {
-					cx = getPosition(length, mMaxProgress, true);
-				} else {
-					cy = getPosition(length, mMaxProgress, true);
-				}
-				canvas.drawCircle(cx, cy, mRadius * 3.5f, mPaint);
-			}
-		}
-
 		if (mOrientation == HORIZONTAL) {
 			cx = getPosition(length, mMinProgress, true);
 		} else {
@@ -924,8 +906,7 @@ public class DiscreteSlider extends View {
 			drawValueLabel(canvas, cx, cy, _cx, _cy, length);
 		}
 
-		mPaint.setColor(mThumbColor);
-		canvas.drawCircle(cx, cy, mRadius, mPaint);
+		onDrawThumb(canvas, cx, cy, mPressedPosition != -1 && mPressedPosition == mMinProgress);
 
 		if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 			mPaint.setColor(mThumbColor);
@@ -943,9 +924,17 @@ public class DiscreteSlider extends View {
 				drawValueLabel(canvas, cx, cy, _cx, _cy, length);
 			}
 
-			mPaint.setColor(mThumbColor);
-			canvas.drawCircle(cx, cy, mRadius, mPaint);
+			onDrawThumb(canvas, cx, cy, mPressedPosition != -1 && mPressedPosition == mMaxProgress);
 		}
+	}
+
+	public void onDrawThumb(Canvas canvas, float cx, float cy, boolean hasTouched) {
+		if (hasTouched) {
+			mPaint.setColor(mThumbPressedColor);
+			canvas.drawCircle(cx, cy, mRadius * 3.5f, mPaint);
+		}
+		mPaint.setColor(mThumbColor);
+		canvas.drawCircle(cx, cy, mRadius, mPaint);
 	}
 
 	private void drawValueLabel(Canvas canvas, float cx, float cy, float _cx, float _cy,

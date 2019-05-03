@@ -96,6 +96,7 @@ mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
         return Integer.toString(input);
     }
 });
+mSlider.setValueLabelVisible(true);
 ```
 
 Setup **ValueLabel** in Xml
@@ -103,6 +104,7 @@ Setup **ValueLabel** in Xml
 app:ds_valueLabelTextColor="#FFF"
 app:ds_valueLabelTextSize="16sp"
 app:ds_valueLabelGravity="top"
+app:ds_valueLabelVisible="true"
 ```
    
 Setup **Progress** in Java
@@ -166,6 +168,24 @@ android:focusable="true"
 Setup **Orientation** in Xml (By default is `horizontal`)
 ```xml
 app:ds_orientation="vertical"
+```
+
+## Customize
+You can draw thumb as you want.
+```java
+public class CustomDiscreteSlider extends DiscreteSlider {
+
+    @Override
+    public void onDrawThumb(Canvas canvas, float cx, float cy, boolean hasTouched) {
+        // Draw thumb as you want
+    }
+
+    @Override
+    public int getSize() {
+        // Override this value to your thumb size
+        return super.getSize();
+    }
+}
 ```
    
 ## Notice
