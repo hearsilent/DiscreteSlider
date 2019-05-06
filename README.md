@@ -170,6 +170,11 @@ Setup **Orientation** in Xml (By default is `horizontal`)
 app:ds_orientation="vertical"
 ```
 
+Setup **HapticFeedback** in Java (By default is `Enabled`)
+```java
+mSlider.setHapticFeedbackEnabled(false);
+```
+
 ## Customize
 You can draw thumb as you want.
 ```java

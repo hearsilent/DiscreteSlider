@@ -15,6 +15,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -67,7 +68,7 @@ public class DiscreteSlider extends View {
 	private int mValueLabelTextColor;
 
 	private int mCount;
-	private int mMinProgress, mMaxProgress = -1;
+	private int mMinProgress = 0, mTmpMinProgress = 0, mMaxProgress = -1, mTmpMaxProgress = -1;
 	private int mPaddingPosition = -1, mPressedPosition = -1;
 
 	@Mode private int mMode = MODE_NORMAL;
@@ -157,12 +158,13 @@ public class DiscreteSlider extends View {
 			mCount = Math.max(mCount, 2);
 			mMode = a.getInt(R.styleable.DiscreteSlider_ds_mode, MODE_NORMAL);
 
-			mMinProgress = a.getInt(R.styleable.DiscreteSlider_ds_progress,
+			mTmpMinProgress = mMinProgress = a.getInt(R.styleable.DiscreteSlider_ds_progress,
 					a.getInt(R.styleable.DiscreteSlider_ds_minProgress, 0));
 			if (mMode == MODE_NORMAL) {
-				mMaxProgress = -1;
+				mTmpMaxProgress = mMaxProgress = -1;
 			} else {
-				mMaxProgress = a.getInt(R.styleable.DiscreteSlider_ds_maxProgress, mCount - 1);
+				mTmpMaxProgress = mMaxProgress =
+						a.getInt(R.styleable.DiscreteSlider_ds_maxProgress, mCount - 1);
 			}
 
 			if (a.hasValue(R.styleable.DiscreteSlider_ds_tickMarkPatterns)) {
@@ -473,6 +475,8 @@ public class DiscreteSlider extends View {
 				mMinProgress = mCount - 1;
 			}
 		}
+		mTmpMinProgress = mMinProgress;
+		mTmpMaxProgress = mMaxProgress;
 	}
 
 	public void setOnValueChangedListener(@Nullable OnValueChangedListener listener) {
@@ -982,14 +986,29 @@ public class DiscreteSlider extends View {
 
 		onDrawThumb(canvas, cx, cy, mPressedPosition != -1 && mPressedPosition == mMinProgress);
 
+		int progress;
+		if (mOrientation == HORIZONTAL) {
+			progress = (int) getClosestPosition(cx, length)[0];
+		} else {
+			progress = (int) getClosestPosition(cy, length)[0];
+		}
+		if (mTmpMinProgress != progress) {
+			mTmpMinProgress = progress;
+			if (isHapticFeedbackEnabled()) {
+				performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+			}
+		}
+
 		if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 			mPaint.setColor(mThumbColor);
 			if (mOrientation == HORIZONTAL) {
 				cx = getPosition(length, mMaxProgress, true);
 				_cx = cx;
+				progress = (int) getClosestPosition(cx, length)[0];
 			} else {
 				cy = getPosition(length, mMaxProgress, true);
 				_cy = cy;
+				progress = (int) getClosestPosition(cy, length)[0];
 			}
 
 			if (mPaddingPosition == mMaxProgress && mValueLabelVisible) {
@@ -999,6 +1018,14 @@ public class DiscreteSlider extends View {
 			}
 
 			onDrawThumb(canvas, cx, cy, mPressedPosition != -1 && mPressedPosition == mMaxProgress);
+
+			if (mTmpMaxProgress != progress) {
+				mTmpMaxProgress = progress;
+				if (isHapticFeedbackEnabled()) {
+					performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+				}
+			}
+
 		}
 	}
 
