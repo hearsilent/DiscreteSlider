@@ -244,14 +244,28 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	public float getTrackWidth() {
+		return mTrackWidth;
+	}
+
 	public void setTrackColor(@ColorInt int trackColor) {
 		mTrackColor = trackColor;
 		invalidate();
 	}
 
+	@ColorInt
+	public int getTrackColor() {
+		return mInactiveTrackColor;
+	}
+
 	public void setInactiveTrackColor(@ColorInt int inactiveTrackColor) {
 		mInactiveTrackColor = inactiveTrackColor;
 		invalidate();
+	}
+
+	@ColorInt
+	public int getInactiveTrackColor() {
+		return mInactiveTrackColor;
 	}
 
 	public void setThumbRadius(@FloatRange(from = Float.MIN_VALUE) float radius) {
@@ -263,9 +277,18 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	public float getThumbRadius() {
+		return mRadius;
+	}
+
 	public void setThumbColor(@ColorInt int thumbColor) {
 		mThumbColor = thumbColor;
 		invalidate();
+	}
+
+	@ColorInt
+	public int getThumbColor() {
+		return mThumbColor;
 	}
 
 	public void setThumbPressedColor(@ColorInt int thumbPressedColor) {
@@ -273,9 +296,19 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	@ColorInt
+	public int getThumbPressedColor() {
+		return mThumbPressedColor;
+	}
+
 	public void setTickMarkColor(@ColorInt int tickMarkColor) {
 		mTickMarkColor = tickMarkColor;
 		invalidate();
+	}
+
+	@ColorInt
+	public int getTickMarkColor() {
+		return mTickMarkColor;
 	}
 
 	public void setTickMarkInactiveColor(@ColorInt int tickMarkInactiveColor) {
@@ -283,9 +316,19 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	@ColorInt
+	public int getTickMarkInactiveColor() {
+		return mTickMarkInactiveColor;
+	}
+
 	public void setValueLabelTextColor(@ColorInt int valueLabelTextColor) {
 		mValueLabelTextColor = valueLabelTextColor;
 		invalidate();
+	}
+
+	@ColorInt
+	public int getValueLabelTextColor() {
+		return mValueLabelTextColor;
 	}
 
 	public void setValueLabelTextSize(
@@ -295,6 +338,10 @@ public class DiscreteSlider extends View {
 		}
 		mValueLabelTextSize = valueLabelTextSize;
 		invalidate();
+	}
+
+	public float getValueLabelTextSize() {
+		return mValueLabelTextSize;
 	}
 
 	public void setValueLabelGravity(@ValueLabelGravity int valueLabelGravity) {
@@ -310,6 +357,11 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	@ValueLabelGravity
+	public int getValueLabelGravity() {
+		return mValueLabelGravity;
+	}
+
 	public void setMode(@Mode int mode) {
 		if (mode != MODE_RANGE && mode != MODE_NORMAL) {
 			throw new IllegalArgumentException("Mode must be normal or range.");
@@ -319,6 +371,11 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	@Mode
+	public int getMode() {
+		return mMode;
+	}
+
 	public void setCount(@IntRange(from = 2) int count) {
 		if (count < 2) {
 			throw new IllegalArgumentException("Count must larger than 2.");
@@ -326,6 +383,10 @@ public class DiscreteSlider extends View {
 		mCount = count;
 		checkProgressBound();
 		invalidate();
+	}
+
+	public int getCount() {
+		return mCount;
 	}
 
 	public void setTickMarkPatterns(List<Object> patterns) {
@@ -343,13 +404,26 @@ public class DiscreteSlider extends View {
 		invalidate();
 	}
 
+	@Nullable
+	public List<Object> getTickMarkPatterns() {
+		return mTickMarkPatterns;
+	}
+
 	public void setValueLabelFormatter(@NonNull ValueLabelFormatter formatter) {
 		mValueLabelFormatter = formatter;
+	}
+
+	public ValueLabelFormatter getValueLabelFormatter() {
+		return mValueLabelFormatter;
 	}
 
 	public void setValueLabelVisible(boolean visible) {
 		mValueLabelVisible = visible;
 		invalidate();
+	}
+
+	public boolean getValueLabelVisible() {
+		return mValueLabelVisible;
 	}
 
 	public void setProgress(int progress) {
@@ -372,7 +446,7 @@ public class DiscreteSlider extends View {
 
 	public void setMaxProgress(int progress) {
 		if (mMode != MODE_RANGE) {
-			throw new IllegalStateException("Set right progress must be range mode.");
+			throw new IllegalStateException("Set max progress must be range mode.");
 		}
 		mMaxProgress = progress;
 		checkProgressBound();
