@@ -48,9 +48,13 @@ mSlider.setInactiveTrackColor(0x3DD81B60);
    
 Setup **Track** in Xml
 ```xml
-app:ds_trackWidth="4dp"
-app:ds_trackColor="#D81B60"
-app:ds_inactiveTrackColor="#3DD81B60"
+<hearsilent.discreteslider.DiscreteSlider
+      android:id="@+id/discreteSlider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:ds_trackWidth="4dp"
+      app:ds_trackColor="#D81B60"
+      app:ds_inactiveTrackColor="#3DD81B60" />
 ```
    
 Setup **Thumb** in Java
