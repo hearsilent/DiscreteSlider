@@ -18,6 +18,7 @@ import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
@@ -569,6 +570,13 @@ public class DiscreteSlider extends View {
 		return isEnabled() && handleTouchEvent(event);
 	}
 
+	private void requestDisallowInterceptTouchEvent(ViewParent parent, boolean isDragging) {
+		if (parent != null) {
+			parent.requestDisallowInterceptTouchEvent(isDragging);
+			requestDisallowInterceptTouchEvent(parent.getParent(), isDragging);
+		}
+	}
+
 	private boolean handleTouchEvent(MotionEvent event) {
 		if (mCount < 2) {
 			mMoveDetector.onTouchEvent(event);
@@ -614,6 +622,11 @@ public class DiscreteSlider extends View {
 				mPressedPosition = mPaddingPosition;
 			} else if (!isClickable()) {
 				mPaddingPosition = -1;
+			}
+
+			if (mPaddingPosition == mMinProgress ||
+					mPaddingPosition == mMaxProgress && mMaxProgress != -1 && mMode == MODE_RANGE) {
+				requestDisallowInterceptTouchEvent(getParent(), true);
 			}
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 			if (mPaddingPosition == -1) {
@@ -777,6 +790,7 @@ public class DiscreteSlider extends View {
 				}
 			}
 			mPressedPosition = -1;
+			requestDisallowInterceptTouchEvent(getParent(), false);
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			if (mPaddingPosition == mMinProgress || mPaddingPosition == mMaxProgress) {
 				setEnabled(false);
@@ -810,6 +824,7 @@ public class DiscreteSlider extends View {
 
 			mPaddingPosition = -1;
 			mPressedPosition = -1;
+			requestDisallowInterceptTouchEvent(getParent(), false);
 		}
 		mMoveDetector.onTouchEvent(event);
 		invalidate();
