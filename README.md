@@ -128,18 +128,19 @@ mSlider.getProgress(); // The same as `getMinProgress`.
 mSlider.getMinProgress();
 mSlider.getMaxProgress();
 mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
+
     @Override
-    // Only called when mode is {@Code MODE_NORMAL}
-    public void onValueChanged(int progress) {
-        super.onValueChanged(progress);
-        Log.i("DiscreteSlider", "Progress: " + progress);
+    public void onValueChanged(int progress, boolean fromUser) {
+        super.onValueChanged(progress, fromUser);
+        Log.i("DiscreteSlider", "Progress: " + progress + ", fromUser: " + fromUser);
     }
 
     @Override
-    // Only called when mode is {@Code MODE_RANGE}
-    public void onValueChanged(int minProgress, int maxProgress) {
-        super.onValueChanged(minProgress, maxProgress);
-        Log.i("DiscreteSlider", "MinProgress: " + minProgress + ", MaxProgress: " + maxProgress);
+    public void onValueChanged(int minProgress, int maxProgress, boolean fromUser) {
+        super.onValueChanged(minProgress, maxProgress, fromUser);
+        Log.i("DiscreteSlider",
+                "MinProgress: " + minProgress + ", MaxProgress: " + maxProgress +
+                        ", fromUser: " + fromUser);
     }
 });
 ```

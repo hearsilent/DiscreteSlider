@@ -434,8 +434,16 @@ public class DiscreteSlider extends View {
 	}
 
 	public void setMinProgress(int progress) {
+		int _progress = mMinProgress;
 		mMinProgress = progress;
 		checkProgressBound();
+		if (_progress != mMinProgress && mListener != null) {
+			if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+				mListener.onValueChanged(mMinProgress, mMaxProgress, false);
+			} else {
+				mListener.onValueChanged(mMinProgress, false);
+			}
+		}
 		invalidate();
 	}
 
@@ -451,8 +459,16 @@ public class DiscreteSlider extends View {
 		if (mMode != MODE_RANGE) {
 			throw new IllegalStateException("Set max progress must be range mode.");
 		}
+		int _progress = mMaxProgress;
 		mMaxProgress = progress;
 		checkProgressBound();
+		if (_progress != mMaxProgress && mListener != null) {
+			if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+				mListener.onValueChanged(mMinProgress, mMaxProgress, false);
+			} else {
+				mListener.onValueChanged(mMinProgress, false);
+			}
+		}
 		invalidate();
 	}
 
@@ -653,12 +669,12 @@ public class DiscreteSlider extends View {
 					if (mListener != null) {
 						if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 							if (mPaddingPosition == mMinProgress) {
-								mListener.onValueChanged(position, mMaxProgress);
+								mListener.onValueChanged(position, mMaxProgress, true);
 							} else {
-								mListener.onValueChanged(mMinProgress, position);
+								mListener.onValueChanged(mMinProgress, position, true);
 							}
 						} else {
-							mListener.onValueChanged(position);
+							mListener.onValueChanged(position, true);
 						}
 					}
 
@@ -705,12 +721,12 @@ public class DiscreteSlider extends View {
 				if (mListener != null) {
 					if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 						if (mPaddingPosition == mMinProgress) {
-							mListener.onValueChanged(position, mMaxProgress);
+							mListener.onValueChanged(position, mMaxProgress, true);
 						} else {
-							mListener.onValueChanged(mMinProgress, position);
+							mListener.onValueChanged(mMinProgress, position, true);
 						}
 					} else {
-						mListener.onValueChanged(position);
+						mListener.onValueChanged(position, true);
 					}
 				}
 
@@ -1231,12 +1247,12 @@ public class DiscreteSlider extends View {
 	public static class OnValueChangedListener {
 
 		// Only called when mode is {@Code MODE_NORMAL}
-		public void onValueChanged(int progress) {
+		public void onValueChanged(int progress, boolean fromUser) {
 
 		}
 
 		// Only called when mode is {@Code MODE_RANGE}
-		public void onValueChanged(int minProgress, int maxProgress) {
+		public void onValueChanged(int minProgress, int maxProgress, boolean fromUser) {
 
 		}
 	}

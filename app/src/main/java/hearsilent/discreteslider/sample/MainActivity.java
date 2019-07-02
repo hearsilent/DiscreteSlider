@@ -61,16 +61,17 @@ public class MainActivity extends AppCompatActivity {
 		mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
 
 			@Override
-			public void onValueChanged(int progress) {
-				super.onValueChanged(progress);
-				Log.i("DiscreteSlider", "Progress: " + progress);
+			public void onValueChanged(int progress, boolean fromUser) {
+				super.onValueChanged(progress, fromUser);
+				Log.i("DiscreteSlider", "Progress: " + progress + ", fromUser: " + fromUser);
 			}
 
 			@Override
-			public void onValueChanged(int minProgress, int maxProgress) {
-				super.onValueChanged(minProgress, maxProgress);
+			public void onValueChanged(int minProgress, int maxProgress, boolean fromUser) {
+				super.onValueChanged(minProgress, maxProgress, fromUser);
 				Log.i("DiscreteSlider",
-						"MinProgress: " + minProgress + ", MaxProgress: " + maxProgress);
+						"MinProgress: " + minProgress + ", MaxProgress: " + maxProgress +
+								", fromUser: " + fromUser);
 			}
 		});
 
