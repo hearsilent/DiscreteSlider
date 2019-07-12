@@ -650,11 +650,10 @@ public class DiscreteSlider extends View {
 				mMoveDetector.onTouchEvent(event);
 				return true;
 			}
-			if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress &&
-					!mSkipMove) {
+			if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress) {
 				float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
 				final int position = (int) getClosestPosition(p, length)[0];
-				if (position == mPaddingPosition) {
+				if (position == mPaddingPosition && !mSkipMove) {
 					if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
 						mPaddingPosition = mMinProgress;
 					} else {
