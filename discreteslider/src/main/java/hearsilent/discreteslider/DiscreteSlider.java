@@ -65,6 +65,7 @@ public class DiscreteSlider extends View {
 	private List<Object> mTickMarkPatterns;
 	private int mTickMarkColor;
 	private int mTickMarkInactiveColor;
+	private int mTickMarkStep;
 
 	private int mValueLabelTextColor;
 
@@ -146,6 +147,7 @@ public class DiscreteSlider extends View {
 			mTickMarkColor = a.getColor(R.styleable.DiscreteSlider_ds_tickMarkColor, 0xff9972ed);
 			mTickMarkInactiveColor =
 					a.getColor(R.styleable.DiscreteSlider_ds_tickMarkInactiveColor, 0xff936ce2);
+			mTickMarkStep = a.getInteger(R.styleable.DiscreteSlider_ds_tickMarkStep, 1);
 
 			mValueLabelTextColor =
 					a.getColor(R.styleable.DiscreteSlider_ds_valueLabelTextColor, Color.WHITE);
@@ -158,6 +160,10 @@ public class DiscreteSlider extends View {
 			mCount = a.getInt(R.styleable.DiscreteSlider_ds_count, 11);
 			mCount = Math.max(mCount, 2);
 			mMode = a.getInt(R.styleable.DiscreteSlider_ds_mode, MODE_NORMAL);
+
+			if (1 > mTickMarkStep || (mCount - 1) % mTickMarkStep != 0) {
+				mTickMarkStep = 1;
+			}
 
 			mTmpMinProgress = mMinProgress = a.getInt(R.styleable.DiscreteSlider_ds_progress,
 					a.getInt(R.styleable.DiscreteSlider_ds_minProgress, 0));
@@ -217,6 +223,7 @@ public class DiscreteSlider extends View {
 
 			mTickMarkColor = 0xff9972ed;
 			mTickMarkInactiveColor = 0xff936ce2;
+			mTickMarkStep = 1;
 
 			mValueLabelTextSize = Utils.convertSpToPixel(16, context);
 			mValueLabelTextColor = Color.WHITE;
@@ -322,6 +329,21 @@ public class DiscreteSlider extends View {
 	@ColorInt
 	public int getTickMarkInactiveColor() {
 		return mTickMarkInactiveColor;
+	}
+
+	public int getTickMarkStep() {
+		return mTickMarkStep;
+	}
+
+	public void setTickMarkStep(int tickMarkStep) {
+		if (1 > tickMarkStep) {
+			throw new IllegalArgumentException("TickMark step must >= 1.");
+		}
+		if ((mCount - 1) % tickMarkStep != 0) {
+			throw new IllegalArgumentException(
+					"TickMark step must be a factor of " + (mCount - 1) + ".");
+		}
+		mTickMarkStep = tickMarkStep;
 	}
 
 	public void setValueLabelTextColor(@ColorInt int valueLabelTextColor) {
@@ -941,6 +963,10 @@ public class DiscreteSlider extends View {
 		if (mTickMarkPatterns != null && mTickMarkPatterns.size() > 0) {
 			if (mOrientation == HORIZONTAL) {
 				for (int i = 0; i < mCount; i++) {
+					if (i % mTickMarkStep != 0) {
+						continue;
+					}
+
 					Object pattern = mTickMarkPatterns.get(i % mTickMarkPatterns.size());
 					cx = getPosition(length, i, false);
 
@@ -960,6 +986,10 @@ public class DiscreteSlider extends View {
 				}
 			} else {
 				for (int i = 0; i < mCount; i++) {
+					if (i % mTickMarkStep != 0) {
+						continue;
+					}
+
 					Object pattern = mTickMarkPatterns.get(i % mTickMarkPatterns.size());
 					cy = getPosition(length, i, false);
 

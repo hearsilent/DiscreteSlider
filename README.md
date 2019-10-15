@@ -72,15 +72,19 @@ Setup **TickMark** in Java
 mSlider.setTickMarkColor(0x3DFFFFFF);
 mSlider.setTickMarkInactiveColor(0x1FD81B60);
 mSlider.setTickMarkPatterns(Arrays.asList(new Dot(), new Dash(Utils.convertDpToPixel(1, this))));
+// TickMark step must be a factor of (count - 1)
+mSlider.setTickMarkStep(1);
 ```
    
 Setup **TickMark** in Xml
 ```xml
 app:ds_tickMarkColor="#3DFFFFFF"
 app:ds_tickMarkInactiveColor="#1FD81B60"
-<!-- Separated by commas, only accept `dot` or `dash`. You can also fill in "dot,dash,dash"-->
+<!-- Separated by commas, only accept `dot` or `dash`. You can also fill in "dot,dash,dash" -->
 app:ds_tickMarkPatterns="dot,dash"
 app:ds_tickMarkDashLength="1dp"
+<!-- TickMark step must be a factor of (count - 1) -->
+app:ds_tickMarkStep="1"
 ```
    
 Setup **ValueLabel** in Java

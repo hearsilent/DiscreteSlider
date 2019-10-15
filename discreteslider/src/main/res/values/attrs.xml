@@ -15,6 +15,7 @@
 		<attr name="ds_tickMarkDashLength" format="dimension"/>
 		<attr name="ds_tickMarkColor" format="color"/>
 		<attr name="ds_tickMarkInactiveColor" format="color"/>
+		<attr name="ds_tickMarkStep" format="integer"/>
 
 		<attr name="ds_valueLabelTextColor" format="color"/>
 		<attr name="ds_valueLabelTextSize" format="dimension"/>
