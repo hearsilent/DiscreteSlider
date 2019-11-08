@@ -207,7 +207,7 @@ Android ICE CREAM SANDWICH 4.0+
 
 ## Credits
 
-This project was inspired by the [Material Design spec](https://material.io/design/components/sliders.html) by Google.
+This project was inspired by the [Material Design spec](https://material.io/components/sliders/) by Google.
 
 ## License
 
