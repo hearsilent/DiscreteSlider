@@ -114,6 +114,7 @@ app:ds_valueLabelVisible="true"
 Setup **Progress** in Java
 ```java
 mSlider.setCount(21);
+mSlider.setProgressOffset(10);
 mSlider.setProgress(5); // The same as `setMinProgress`.
 mSlider.setMinProgress(5);
 mSlider.setMaxProgress(10); // Only can call in range mode.
@@ -122,6 +123,7 @@ mSlider.setMaxProgress(10); // Only can call in range mode.
 Setup **Progress** in Xml
 ```xml
 app:ds_count="21"
+app:ds_progressOffset="10"
 app:ds_minProgress="5"
 app:ds_maxProgress="5"
 ```

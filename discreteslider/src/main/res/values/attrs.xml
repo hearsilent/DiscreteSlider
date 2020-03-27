@@ -3,44 +3,45 @@
 
 	<declare-styleable name="DiscreteSlider">
 
-		<attr name="ds_trackWidth" format="dimension"/>
-		<attr name="ds_trackColor" format="color"/>
-		<attr name="ds_inactiveTrackColor" format="color"/>
+		<attr name="ds_trackWidth" format="dimension" />
+		<attr name="ds_trackColor" format="color" />
+		<attr name="ds_inactiveTrackColor" format="color" />
 
-		<attr name="ds_thumbRadius" format="dimension"/>
-		<attr name="ds_thumbColor" format="color"/>
-		<attr name="ds_thumbPressedColor" format="color"/>
+		<attr name="ds_thumbRadius" format="dimension" />
+		<attr name="ds_thumbColor" format="color" />
+		<attr name="ds_thumbPressedColor" format="color" />
 
-		<attr name="ds_tickMarkPatterns" format="string"/>
-		<attr name="ds_tickMarkDashLength" format="dimension"/>
-		<attr name="ds_tickMarkColor" format="color"/>
-		<attr name="ds_tickMarkInactiveColor" format="color"/>
-		<attr name="ds_tickMarkStep" format="integer"/>
+		<attr name="ds_tickMarkPatterns" format="string" />
+		<attr name="ds_tickMarkDashLength" format="dimension" />
+		<attr name="ds_tickMarkColor" format="color" />
+		<attr name="ds_tickMarkInactiveColor" format="color" />
+		<attr name="ds_tickMarkStep" format="integer" />
 
-		<attr name="ds_valueLabelTextColor" format="color"/>
-		<attr name="ds_valueLabelTextSize" format="dimension"/>
+		<attr name="ds_valueLabelTextColor" format="color" />
+		<attr name="ds_valueLabelTextSize" format="dimension" />
 		<attr name="ds_valueLabelGravity" format="enum">
-			<enum name="top" value="0"/>
-			<enum name="right" value="90"/>
-			<enum name="bottom" value="180"/>
-			<enum name="left" value="270"/>
+			<enum name="top" value="0" />
+			<enum name="right" value="90" />
+			<enum name="bottom" value="180" />
+			<enum name="left" value="270" />
 		</attr>
-		<attr name="ds_valueLabelVisible" format="boolean"/>
+		<attr name="ds_valueLabelVisible" format="boolean" />
 
-		<attr name="ds_count" format="integer"/>
+		<attr name="ds_count" format="integer" />
 		<attr name="ds_mode" format="enum">
-			<enum name="normal" value="0"/>
-			<enum name="range" value="1"/>
+			<enum name="normal" value="0" />
+			<enum name="range" value="1" />
 		</attr>
 
-		<attr name="ds_progress" format="integer"/>
+		<attr name="ds_progressOffset" format="integer" />
+		<attr name="ds_progress" format="integer" />
 
-		<attr name="ds_minProgress" format="integer"/>
-		<attr name="ds_maxProgress" format="integer"/>
+		<attr name="ds_minProgress" format="integer" />
+		<attr name="ds_maxProgress" format="integer" />
 
 		<attr name="ds_orientation" format="enum">
-			<enum name="horizontal" value="0"/>
-			<enum name="vertical" value="1"/>
+			<enum name="horizontal" value="0" />
+			<enum name="vertical" value="1" />
 		</attr>
 
 	</declare-styleable>

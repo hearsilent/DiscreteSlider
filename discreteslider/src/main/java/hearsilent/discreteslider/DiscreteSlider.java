@@ -70,6 +70,7 @@ public class DiscreteSlider extends View {
 	private int mValueLabelTextColor;
 
 	private int mCount;
+	private int mProgressOffset = 0;
 	private int mMinProgress = 0, mTmpMinProgress = 0, mMaxProgress = -1, mTmpMaxProgress = -1;
 	private int mPaddingPosition = -1, mPressedPosition = -1;
 
@@ -165,6 +166,7 @@ public class DiscreteSlider extends View {
 				mTickMarkStep = 1;
 			}
 
+			mProgressOffset = a.getInt(R.styleable.DiscreteSlider_ds_progressOffset, 0);
 			mTmpMinProgress = mMinProgress = a.getInt(R.styleable.DiscreteSlider_ds_progress,
 					a.getInt(R.styleable.DiscreteSlider_ds_minProgress, 0));
 			if (mMode == MODE_NORMAL) {
@@ -451,6 +453,11 @@ public class DiscreteSlider extends View {
 		return mValueLabelVisible;
 	}
 
+	public void setProgressOffset(int progressOffset) {
+		mProgressOffset = progressOffset;
+		invalidate();
+	}
+
 	public void setProgress(int progress) {
 		setMinProgress(progress);
 	}
@@ -461,9 +468,10 @@ public class DiscreteSlider extends View {
 		checkProgressBound();
 		if (_progress != mMinProgress && mListener != null) {
 			if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
-				mListener.onValueChanged(mMinProgress, mMaxProgress, false);
+				mListener.onValueChanged(mMinProgress + mProgressOffset,
+						mMaxProgress + mProgressOffset, false);
 			} else {
-				mListener.onValueChanged(mMinProgress, false);
+				mListener.onValueChanged(mMinProgress + mProgressOffset, false);
 			}
 		}
 		invalidate();
@@ -486,9 +494,9 @@ public class DiscreteSlider extends View {
 		checkProgressBound();
 		if (_progress != mMaxProgress && mListener != null) {
 			if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
-				mListener.onValueChanged(mMinProgress, mMaxProgress, false);
+				mListener.onValueChanged(mMinProgress + mProgressOffset, mMaxProgress, false);
 			} else {
-				mListener.onValueChanged(mMinProgress, false);
+				mListener.onValueChanged(mMinProgress + mProgressOffset, false);
 			}
 		}
 		invalidate();
@@ -707,12 +715,14 @@ public class DiscreteSlider extends View {
 					if (mListener != null) {
 						if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 							if (mPaddingPosition == mMinProgress) {
-								mListener.onValueChanged(position, mMaxProgress, true);
+								mListener.onValueChanged(position + mProgressOffset,
+										mMaxProgress + mProgressOffset, true);
 							} else {
-								mListener.onValueChanged(mMinProgress, position, true);
+								mListener.onValueChanged(mMinProgress + mProgressOffset,
+										position + mProgressOffset, true);
 							}
 						} else {
-							mListener.onValueChanged(position, true);
+							mListener.onValueChanged(position + mProgressOffset, true);
 						}
 					}
 
@@ -759,12 +769,14 @@ public class DiscreteSlider extends View {
 				if (mListener != null) {
 					if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
 						if (mPaddingPosition == mMinProgress) {
-							mListener.onValueChanged(position, mMaxProgress, true);
+							mListener.onValueChanged(position + mProgressOffset,
+									mMaxProgress + mProgressOffset, true);
 						} else {
-							mListener.onValueChanged(mMinProgress, position, true);
+							mListener.onValueChanged(mMinProgress + mProgressOffset,
+									position + mProgressOffset, true);
 						}
 					} else {
-						mListener.onValueChanged(position, true);
+						mListener.onValueChanged(position + mProgressOffset, true);
 					}
 				}
 
@@ -1132,9 +1144,11 @@ public class DiscreteSlider extends View {
 
 		String label;
 		if (mOrientation == HORIZONTAL) {
-			label = mValueLabelFormatter.getLabel((int) getClosestPosition(cx, length)[0]);
+			label = mValueLabelFormatter
+					.getLabel((int) getClosestPosition(cx, length)[0] + mProgressOffset);
 		} else {
-			label = mValueLabelFormatter.getLabel((int) getClosestPosition(cy, length)[0]);
+			label = mValueLabelFormatter
+					.getLabel((int) getClosestPosition(cy, length)[0] + mProgressOffset);
 		}
 		if (!TextUtils.isEmpty(label)) {
 			mPaint.setTextSize(mValueLabelTextSize * mValueLabelAnimValue);
