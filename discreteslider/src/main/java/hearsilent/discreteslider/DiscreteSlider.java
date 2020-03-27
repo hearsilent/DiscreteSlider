@@ -645,6 +645,23 @@ public class DiscreteSlider extends View {
 				mPaddingPosition = (int) getClosestPosition(p, length)[0];
 			}
 
+			if (isClickable()) {
+				if (mPaddingPosition != mMinProgress &&
+						!(mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL)) {
+					animValueLabel();
+				}
+				if (mMaxProgress != -1 && mMode == MODE_RANGE) {
+					if (Math.abs(mMinProgress - mPaddingPosition) >
+							Math.abs(mMaxProgress - mPaddingPosition)) {
+						mMaxProgress = mPaddingPosition;
+					} else {
+						mMinProgress = mPaddingPosition;
+					}
+				} else {
+					mMinProgress = mPaddingPosition;
+				}
+			}
+
 			p = getPosition(length, mPaddingPosition, false);
 			if (mPaddingPosition == mMinProgress) {
 				mMinOffset = getPosition(length, 0, false) - p;
