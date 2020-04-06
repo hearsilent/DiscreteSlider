@@ -100,7 +100,8 @@ mSlider.setValueLabelFormatter(new DiscreteSlider.ValueLabelFormatter() {
         return Integer.toString(input);
     }
 });
-mSlider.setValueLabelVisible(true);
+mSlider.setValueLabelMode(1); // 0: none, 1: showOnPressHold, 2: showOnProgressChange, 3: showOnPressHold & showOnProgressChange
+mSlider.setValueLabelDuration(1500); // Use for mode `showOnProgressChange`
 ```
 
 Setup **ValueLabel** in Xml
@@ -108,7 +109,8 @@ Setup **ValueLabel** in Xml
 app:ds_valueLabelTextColor="#FFF"
 app:ds_valueLabelTextSize="16sp"
 app:ds_valueLabelGravity="top"
-app:ds_valueLabelVisible="true"
+app:ds_valueLabelMode="showOnPressHold|showOnProgressChange" <!-- Default is showOnPressHold -->
+app:ds_valueLabelDuration="2500" <!-- Default is 1500ms -->
 ```
    
 Setup **Progress** in Java

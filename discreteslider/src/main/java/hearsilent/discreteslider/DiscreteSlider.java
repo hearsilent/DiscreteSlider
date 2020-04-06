@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
@@ -87,7 +88,10 @@ public class DiscreteSlider extends View {
 	private Matrix mValueLabelMatrix = new Matrix();
 	private float mValueLabelAnimValue = 0f;
 	@ValueLabelGravity private int mValueLabelGravity;
-	private boolean mValueLabelVisible = true;
+	private int mValueLabelMode = 1;
+	private int mValueLabelDuration = 1500;
+	private Handler mShowValueLabelHandler = new Handler();
+	private boolean mValueLabelIsShowing = false;
 
 	private boolean mSkipMove;
 
@@ -155,8 +159,9 @@ public class DiscreteSlider extends View {
 			mValueLabelTextSize = a.getDimension(R.styleable.DiscreteSlider_ds_valueLabelTextSize,
 					Utils.convertSpToPixel(16, context));
 			mValueLabelGravity = a.getInt(R.styleable.DiscreteSlider_ds_valueLabelGravity, TOP);
-			mValueLabelVisible =
-					a.getBoolean(R.styleable.DiscreteSlider_ds_valueLabelVisible, true);
+			mValueLabelMode = a.getInt(R.styleable.DiscreteSlider_ds_valueLabelMode, 1);
+			mValueLabelDuration = a.getInt(R.styleable.DiscreteSlider_ds_valueLabelDuration, 1500);
+			mValueLabelDuration = Math.max(mValueLabelDuration, 500);
 
 			mCount = a.getInt(R.styleable.DiscreteSlider_ds_count, 11);
 			mCount = Math.max(mCount, 2);
@@ -444,13 +449,22 @@ public class DiscreteSlider extends View {
 		return mValueLabelFormatter;
 	}
 
-	public void setValueLabelVisible(boolean visible) {
-		mValueLabelVisible = visible;
+	public void setValueLabelMode(int mode) {
+		mValueLabelMode = mode;
 		invalidate();
 	}
 
-	public boolean getValueLabelVisible() {
-		return mValueLabelVisible;
+	public int getValueLabelMode() {
+		return mValueLabelMode;
+	}
+
+	public void setValueLabelDuration(@IntRange(from = 500) int duration) {
+		mValueLabelDuration = duration;
+		invalidate();
+	}
+
+	public int getValueLabelDuration() {
+		return mValueLabelDuration;
 	}
 
 	public void setProgressOffset(int progressOffset) {
@@ -474,6 +488,11 @@ public class DiscreteSlider extends View {
 				mListener.onValueChanged(mMinProgress + mProgressOffset, false);
 			}
 		}
+
+		if ((mValueLabelMode >> 1 & 0x1) == 1) {
+			showMinValueLabel();
+		}
+
 		invalidate();
 	}
 
@@ -499,6 +518,11 @@ public class DiscreteSlider extends View {
 				mListener.onValueChanged(mMinProgress + mProgressOffset, false);
 			}
 		}
+
+		if ((mValueLabelMode >> 1 & 0x1) == 1) {
+			showMaxValueLabel();
+		}
+
 		invalidate();
 	}
 
@@ -630,6 +654,8 @@ public class DiscreteSlider extends View {
 		}
 		float length = mLength - mTrackWidth;
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			int paddingPosition = mPaddingPosition;
+
 			mOffset = 0;
 			mPaddingPosition = -1;
 			mSkipMove = false;
@@ -651,6 +677,15 @@ public class DiscreteSlider extends View {
 			}
 			if (mPaddingPosition == -1) {
 				mPaddingPosition = (int) getClosestPosition(p, length)[0];
+			}
+
+			if (paddingPosition != mPaddingPosition) {
+				if (mValueLabelAnimator != null) {
+					mValueLabelAnimator.cancel();
+					mValueLabelAnimator = null;
+				}
+				mValueLabelAnimValue = 0;
+				mShowValueLabelHandler.removeCallbacksAndMessages(null);
 			}
 
 			if (isClickable()) {
@@ -816,44 +851,7 @@ public class DiscreteSlider extends View {
 				});
 				animator.start();
 
-				float value = mValueLabelAnimValue;
-				if (mValueLabelAnimator != null) {
-					value = mValueLabelAnimator.getAnimatedFraction();
-					mValueLabelAnimator.cancel();
-				}
-
-				if (value > 0) {
-					mValueLabelAnimator = ValueAnimator.ofFloat(value, 0);
-					mValueLabelAnimator.setDuration(Math.round(250 * value));
-					mValueLabelAnimator.setInterpolator(new DecelerateInterpolator());
-					mValueLabelAnimator
-							.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-								@Override
-								public void onAnimationUpdate(ValueAnimator animation) {
-									mValueLabelAnimValue = (float) animation.getAnimatedValue();
-									generateValueLabelPath();
-									invalidate();
-								}
-							});
-					mValueLabelAnimator.addListener(new AnimatorListenerAdapter() {
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							super.onAnimationEnd(animation);
-							mValueLabelAnimator = null;
-							if (mOffset == 0) {
-								mPaddingPosition = -1;
-								setEnabled(true);
-							}
-
-							invalidate();
-						}
-					});
-					mValueLabelAnimator.start();
-				} else {
-					mValueLabelAnimator = null;
-				}
+				hideValueLabel();
 			}
 			mPressedPosition = -1;
 			requestDisallowInterceptTouchEvent(getParent(), false);
@@ -898,8 +896,22 @@ public class DiscreteSlider extends View {
 	}
 
 	private void animValueLabel() {
-		mValueLabelAnimator = ValueAnimator.ofFloat(0, 1);
-		mValueLabelAnimator.setDuration(250);
+		mValueLabelIsShowing = true;
+		mShowValueLabelHandler.removeCallbacksAndMessages(null);
+
+		float value = mValueLabelAnimValue;
+		if (mValueLabelAnimator != null) {
+			value = mValueLabelAnimator.getAnimatedFraction();
+			mValueLabelAnimator.cancel();
+		}
+
+		if (value == 1) {
+			mValueLabelAnimator = null;
+			return;
+		}
+
+		mValueLabelAnimator = ValueAnimator.ofFloat(value, 1);
+		mValueLabelAnimator.setDuration(Math.round((250 * (1 - value))));
 		mValueLabelAnimator.setInterpolator(new AccelerateInterpolator());
 		mValueLabelAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
@@ -911,6 +923,70 @@ public class DiscreteSlider extends View {
 			}
 		});
 		mValueLabelAnimator.start();
+	}
+
+	private void hideValueLabel() {
+		mValueLabelIsShowing = false;
+		mShowValueLabelHandler.removeCallbacksAndMessages(null);
+
+		float value = mValueLabelAnimValue;
+		if (mValueLabelAnimator != null) {
+			value = mValueLabelAnimator.getAnimatedFraction();
+			mValueLabelAnimator.cancel();
+		}
+
+		if (value > 0) {
+			mValueLabelAnimator = ValueAnimator.ofFloat(value, 0);
+			mValueLabelAnimator.setDuration(Math.round(250 * value));
+			mValueLabelAnimator.setInterpolator(new DecelerateInterpolator());
+			mValueLabelAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+				@Override
+				public void onAnimationUpdate(ValueAnimator animation) {
+					mValueLabelAnimValue = (float) animation.getAnimatedValue();
+					generateValueLabelPath();
+					invalidate();
+				}
+			});
+			mValueLabelAnimator.addListener(new AnimatorListenerAdapter() {
+
+				@Override
+				public void onAnimationEnd(Animator animation) {
+					super.onAnimationEnd(animation);
+					mValueLabelAnimator = null;
+					if (mOffset == 0) {
+						mPaddingPosition = -1;
+						setEnabled(true);
+					}
+
+					invalidate();
+				}
+			});
+			mValueLabelAnimator.start();
+		} else {
+			mValueLabelAnimator = null;
+		}
+	}
+
+	private void showMinValueLabel() {
+		mPaddingPosition = mMinProgress;
+		showValueLabel();
+	}
+
+	private void showMaxValueLabel() {
+		mPaddingPosition = mMaxProgress;
+		showValueLabel();
+	}
+
+	private void showValueLabel() {
+		animValueLabel();
+		mShowValueLabelHandler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				hideValueLabel();
+			}
+		}, mValueLabelDuration - 250);
 	}
 
 	@Override
@@ -938,6 +1014,8 @@ public class DiscreteSlider extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		boolean isValueLabelVisible =
+				(mValueLabelMode & 0x1) == 1 || (mValueLabelMode >> 1 & 0x1) == 1;
 		float length = mLength - mTrackWidth;
 		mPaint.setColor(mInactiveTrackColor);
 		canvas.drawPath(mInactiveTrackPath, mPaint);
@@ -1066,7 +1144,8 @@ public class DiscreteSlider extends View {
 				_cx = cx + (_cx - cx) * mValueLabelAnimValue * ratio;
 			}
 		}
-		if (mPaddingPosition == mMinProgress && mPaddingPosition != -1 && mValueLabelVisible) {
+		if (mPaddingPosition == mMinProgress && mPaddingPosition != -1 &&
+				mValueLabelAnimValue > 0 && isValueLabelVisible) {
 			mPaint.setColor(mThumbColor);
 			canvas.drawPath(mValueLabelPath, mPaint);
 			canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
@@ -1100,7 +1179,8 @@ public class DiscreteSlider extends View {
 				progress = (int) getClosestPosition(cy, length)[0];
 			}
 
-			if (mPaddingPosition == mMaxProgress && mValueLabelVisible) {
+			if (mPaddingPosition == mMaxProgress && mValueLabelAnimValue > 0 &&
+					isValueLabelVisible) {
 				canvas.drawPath(mValueLabelPath, mPaint);
 				canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
 				drawValueLabel(canvas, cx, cy, _cx, _cy, length);
@@ -1174,8 +1254,11 @@ public class DiscreteSlider extends View {
 					mPaddingPosition != -1) {
 				mOffset = Math.min(Math.max(mOffset, mMinOffset), mMaxOffset);
 				generateValueLabelPath();
-				if (Math.abs(mOffset) >= mRadius * 2 && mValueLabelAnimator == null) {
+				if (Math.abs(mOffset) >= mRadius * 2 && !mValueLabelIsShowing &&
+						(mValueLabelMode & 0x1) == 1) {
 					animValueLabel();
+				} else if ((mValueLabelMode & 0x1) == 1) {
+					mShowValueLabelHandler.removeCallbacksAndMessages(null);
 				}
 			} else if (Math.abs(mOffset) >= mRadius * 3.5) {
 				mSkipMove = true;
