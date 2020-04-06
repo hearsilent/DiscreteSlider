@@ -99,6 +99,7 @@ public class DiscreteSlider extends View {
 	@OrientationMode private int mOrientation;
 
 	private OnValueChangedListener mListener;
+	private boolean mValueChangedImmediately = false;
 
 	@IntDef({MODE_NORMAL, MODE_RANGE}) @Retention(RetentionPolicy.SOURCE) private @interface Mode {
 
@@ -513,9 +514,8 @@ public class DiscreteSlider extends View {
 		checkProgressBound();
 		if (_progress != mMaxProgress && mListener != null) {
 			if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
-				mListener.onValueChanged(mMinProgress + mProgressOffset, mMaxProgress, false);
-			} else {
-				mListener.onValueChanged(mMinProgress + mProgressOffset, false);
+				mListener.onValueChanged(mMinProgress + mProgressOffset,
+						mMaxProgress + mProgressOffset, false);
 			}
 		}
 
@@ -552,6 +552,10 @@ public class DiscreteSlider extends View {
 
 	public void setOnValueChangedListener(@Nullable OnValueChangedListener listener) {
 		mListener = listener;
+	}
+
+	public void setValueChangedImmediately(boolean immediately) {
+		mValueChangedImmediately = immediately;
 	}
 
 	private void generateInactiveTrackPath() {
@@ -1165,6 +1169,14 @@ public class DiscreteSlider extends View {
 			if (isHapticFeedbackEnabled()) {
 				performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
 			}
+			if (mListener != null && mValueChangedImmediately) {
+				if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+					mListener.onValueChanged(progress + mProgressOffset,
+							mMaxProgress + mProgressOffset, true);
+				} else {
+					mListener.onValueChanged(progress + mProgressOffset, true);
+				}
+			}
 		}
 
 		if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
@@ -1192,6 +1204,12 @@ public class DiscreteSlider extends View {
 				mTmpMaxProgress = progress;
 				if (isHapticFeedbackEnabled()) {
 					performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+				}
+				if (mListener != null && mValueChangedImmediately) {
+					if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
+						mListener.onValueChanged(mMinProgress + mProgressOffset,
+								progress + mProgressOffset, true);
+					}
 				}
 			}
 

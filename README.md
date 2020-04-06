@@ -135,6 +135,7 @@ Get **Progress** in Java
 mSlider.getProgress(); // The same as `getMinProgress`.
 mSlider.getMinProgress();
 mSlider.getMaxProgress();
+mSlider.setValueChangedImmediately(true); // Default is false
 mSlider.setOnValueChangedListener(new DiscreteSlider.OnValueChangedListener() {
 
     @Override
