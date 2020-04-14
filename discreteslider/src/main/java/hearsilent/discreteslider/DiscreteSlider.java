@@ -73,7 +73,7 @@ public class DiscreteSlider extends View {
 	private int mCount;
 	private int mProgressOffset = 0;
 	private int mMinProgress = 0, mTmpMinProgress = 0, mMaxProgress = -1, mTmpMaxProgress = -1;
-	private int mPaddingPosition = -1, mPressedPosition = -1;
+	private int mPendingPosition = -1, mPressedPosition = -1;
 
 	@Mode private int mMode = MODE_NORMAL;
 
@@ -658,32 +658,32 @@ public class DiscreteSlider extends View {
 		}
 		float length = mLength - mTrackWidth;
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			int paddingPosition = mPaddingPosition;
+			int pendingPosition = mPendingPosition;
 
 			mOffset = 0;
-			mPaddingPosition = -1;
+			mPendingPosition = -1;
 			mSkipMove = false;
 
 			float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
 			if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
 				float c = getPosition(length, mMinProgress, false);
 				if (c - mRadius * 3.5 <= p && p <= c + mRadius * 3.5) {
-					mPaddingPosition = mMinProgress;
+					mPendingPosition = mMinProgress;
 				}
 			} else {
 				float c1 = getPosition(length, mMinProgress, false);
 				float c2 = getPosition(length, mMaxProgress, false);
 				if (c1 - mRadius * 3.5 <= p && p <= c1 + mRadius * 3.5) {
-					mPaddingPosition = mMinProgress;
+					mPendingPosition = mMinProgress;
 				} else if (c2 - mRadius * 3.5 <= p && p <= c2 + mRadius * 3.5) {
-					mPaddingPosition = mMaxProgress;
+					mPendingPosition = mMaxProgress;
 				}
 			}
-			if (mPaddingPosition == -1) {
-				mPaddingPosition = (int) getClosestPosition(p, length)[0];
+			if (mPendingPosition == -1) {
+				mPendingPosition = (int) getClosestPosition(p, length)[0];
 			}
 
-			if (paddingPosition != mPaddingPosition) {
+			if (pendingPosition != mPendingPosition) {
 				if (mValueLabelAnimator != null) {
 					mValueLabelAnimator.cancel();
 					mValueLabelAnimator = null;
@@ -693,67 +693,67 @@ public class DiscreteSlider extends View {
 			}
 
 			if (isClickable()) {
-				if (mPaddingPosition != mMinProgress &&
-						!(mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL)) {
+				if (mPendingPosition != mMinProgress &&
+						!(mPendingPosition == mMaxProgress && mMode != MODE_NORMAL)) {
 					animValueLabel();
 				}
 				if (mMaxProgress != -1 && mMode == MODE_RANGE) {
-					if (Math.abs(mMinProgress - mPaddingPosition) >
-							Math.abs(mMaxProgress - mPaddingPosition)) {
-						mMaxProgress = mPaddingPosition;
+					if (Math.abs(mMinProgress - mPendingPosition) >
+							Math.abs(mMaxProgress - mPendingPosition)) {
+						mMaxProgress = mPendingPosition;
 					} else {
-						mMinProgress = mPaddingPosition;
+						mMinProgress = mPendingPosition;
 					}
 				} else {
-					mMinProgress = mPaddingPosition;
+					mMinProgress = mPendingPosition;
 				}
 			}
 
-			p = getPosition(length, mPaddingPosition, false);
-			if (mPaddingPosition == mMinProgress) {
+			p = getPosition(length, mPendingPosition, false);
+			if (mPendingPosition == mMinProgress) {
 				mMinOffset = getPosition(length, 0, false) - p;
 				if (mMaxProgress != -1 && mMode == MODE_RANGE) {
 					mMaxOffset = getPosition(length, mMaxProgress - 1, false) - p;
 				} else {
 					mMaxOffset = getPosition(length, mCount - 1, false) - p;
 				}
-				mPressedPosition = mPaddingPosition;
-			} else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+				mPressedPosition = mPendingPosition;
+			} else if (mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) {
 				mMinOffset = getPosition(length, mMinProgress + 1, false) - p;
 				mMaxOffset = getPosition(length, mCount - 1, false) - p;
-				mPressedPosition = mPaddingPosition;
+				mPressedPosition = mPendingPosition;
 			} else if (!isClickable()) {
-				mPaddingPosition = -1;
+				mPendingPosition = -1;
 			}
 
-			if (mPaddingPosition == mMinProgress ||
-					mPaddingPosition == mMaxProgress && mMaxProgress != -1 && mMode == MODE_RANGE) {
+			if (mPendingPosition == mMinProgress ||
+					mPendingPosition == mMaxProgress && mMaxProgress != -1 && mMode == MODE_RANGE) {
 				requestDisallowInterceptTouchEvent(getParent(), true);
 			}
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
-			if (mPaddingPosition == -1) {
+			if (mPendingPosition == -1) {
 				mOffset = 0;
 				mMoveDetector.onTouchEvent(event);
 				return true;
 			}
-			if (mPaddingPosition != mMinProgress && mPaddingPosition != mMaxProgress) {
+			if (mPendingPosition != mMinProgress && mPendingPosition != mMaxProgress) {
 				float p = mOrientation == HORIZONTAL ? event.getX() : event.getY();
 				final int position = (int) getClosestPosition(p, length)[0];
-				if (position == mPaddingPosition && !mSkipMove) {
+				if (position == mPendingPosition && !mSkipMove) {
 					if (mMaxProgress == -1 && mMode == MODE_NORMAL) {
-						mPaddingPosition = mMinProgress;
+						mPendingPosition = mMinProgress;
 					} else {
 						if (Math.abs(mMinProgress - position) <=
 								Math.abs(mMaxProgress - position)) {
-							mPaddingPosition = mMinProgress;
+							mPendingPosition = mMinProgress;
 						} else {
-							mPaddingPosition = mMaxProgress;
+							mPendingPosition = mMaxProgress;
 						}
 					}
 
 					if (mListener != null) {
 						if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
-							if (mPaddingPosition == mMinProgress) {
+							if (mPendingPosition == mMinProgress) {
 								mListener.onValueChanged(position + mProgressOffset,
 										mMaxProgress + mProgressOffset, true);
 							} else {
@@ -768,7 +768,7 @@ public class DiscreteSlider extends View {
 					setEnabled(false);
 
 					mOffset = 0;
-					float dis = length / (mCount - 1) * (position - mPaddingPosition);
+					float dis = length / (mCount - 1) * (position - mPendingPosition);
 					ValueAnimator animator = ValueAnimator.ofFloat(mOffset, mOffset + dis);
 					animator.setInterpolator(new DecelerateInterpolator(2.5f));
 					animator.setDuration(250);
@@ -786,12 +786,12 @@ public class DiscreteSlider extends View {
 						public void onAnimationEnd(Animator animation) {
 							super.onAnimationEnd(animation);
 							mOffset = 0;
-							if (mPaddingPosition == mMinProgress) {
+							if (mPendingPosition == mMinProgress) {
 								mMinProgress = position;
-							} else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+							} else if (mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) {
 								mMaxProgress = position;
 							}
-							mPaddingPosition = -1;
+							mPendingPosition = -1;
 							setEnabled(true);
 
 							invalidate();
@@ -800,14 +800,14 @@ public class DiscreteSlider extends View {
 					animator.start();
 				}
 			} else {
-				float p = getPosition(length, mPaddingPosition, true);
+				float p = getPosition(length, mPendingPosition, true);
 				float[] closestPosition = getClosestPosition(p, length);
 				float dis = closestPosition[1];
 				int position = (int) closestPosition[0];
 
 				if (mListener != null) {
 					if (mMaxProgress != -1 && mMode != MODE_NORMAL) {
-						if (mPaddingPosition == mMinProgress) {
+						if (mPendingPosition == mMinProgress) {
 							mListener.onValueChanged(position + mProgressOffset,
 									mMaxProgress + mProgressOffset, true);
 						} else {
@@ -839,16 +839,16 @@ public class DiscreteSlider extends View {
 					public void onAnimationEnd(Animator animation) {
 						super.onAnimationEnd(animation);
 						mOffset = 0;
-						if (mPaddingPosition == mMinProgress) {
+						if (mPendingPosition == mMinProgress) {
 							mMinProgress = _position;
-						} else if (mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+						} else if (mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) {
 							mMaxProgress = _position;
 						}
 						if (mValueLabelAnimator == null) {
-							mPaddingPosition = -1;
+							mPendingPosition = -1;
 							setEnabled(true);
 						} else {
-							mPaddingPosition = _position;
+							mPendingPosition = _position;
 						}
 						invalidate();
 					}
@@ -860,7 +860,7 @@ public class DiscreteSlider extends View {
 			mPressedPosition = -1;
 			requestDisallowInterceptTouchEvent(getParent(), false);
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-			if (mPaddingPosition == mMinProgress || mPaddingPosition == mMaxProgress) {
+			if (mPendingPosition == mMinProgress || mPendingPosition == mMaxProgress) {
 				setEnabled(false);
 
 				ValueAnimator animator = ValueAnimator.ofFloat(mOffset, 0);
@@ -880,7 +880,7 @@ public class DiscreteSlider extends View {
 					public void onAnimationEnd(Animator animation) {
 						super.onAnimationEnd(animation);
 						mOffset = 0;
-						mPaddingPosition = -1;
+						mPendingPosition = -1;
 						setEnabled(true);
 						invalidate();
 					}
@@ -890,7 +890,7 @@ public class DiscreteSlider extends View {
 				mOffset = 0;
 			}
 
-			mPaddingPosition = -1;
+			mPendingPosition = -1;
 			mPressedPosition = -1;
 			requestDisallowInterceptTouchEvent(getParent(), false);
 		}
@@ -959,7 +959,7 @@ public class DiscreteSlider extends View {
 					super.onAnimationEnd(animation);
 					mValueLabelAnimator = null;
 					if (mOffset == 0) {
-						mPaddingPosition = -1;
+						mPendingPosition = -1;
 						setEnabled(true);
 					}
 
@@ -973,12 +973,12 @@ public class DiscreteSlider extends View {
 	}
 
 	private void showMinValueLabel() {
-		mPaddingPosition = mMinProgress;
+		mPendingPosition = mMinProgress;
 		showValueLabel();
 	}
 
 	private void showMaxValueLabel() {
-		mPaddingPosition = mMaxProgress;
+		mPendingPosition = mMaxProgress;
 		showValueLabel();
 	}
 
@@ -1148,7 +1148,7 @@ public class DiscreteSlider extends View {
 				_cx = cx + (_cx - cx) * mValueLabelAnimValue * ratio;
 			}
 		}
-		if (mPaddingPosition == mMinProgress && mPaddingPosition != -1 &&
+		if (mPendingPosition == mMinProgress && mPendingPosition != -1 &&
 				mValueLabelAnimValue > 0 && isValueLabelVisible) {
 			mPaint.setColor(mThumbColor);
 			canvas.drawPath(mValueLabelPath, mPaint);
@@ -1191,7 +1191,7 @@ public class DiscreteSlider extends View {
 				progress = (int) getClosestPosition(cy, length)[0];
 			}
 
-			if (mPaddingPosition == mMaxProgress && mValueLabelAnimValue > 0 &&
+			if (mPendingPosition == mMaxProgress && mValueLabelAnimValue > 0 &&
 					isValueLabelVisible) {
 				canvas.drawPath(mValueLabelPath, mPaint);
 				canvas.drawCircle(_cx, _cy, mRadius * 3 * mValueLabelAnimValue, mPaint);
@@ -1267,9 +1267,9 @@ public class DiscreteSlider extends View {
 			} else {
 				mOffset += d.y;
 			}
-			if ((mPaddingPosition == mMinProgress ||
-					mPaddingPosition == mMaxProgress && mMode != MODE_NORMAL) &&
-					mPaddingPosition != -1) {
+			if ((mPendingPosition == mMinProgress ||
+					mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) &&
+					mPendingPosition != -1) {
 				mOffset = Math.min(Math.max(mOffset, mMinOffset), mMaxOffset);
 				generateValueLabelPath();
 				if (Math.abs(mOffset) >= mRadius * 2 && !mValueLabelIsShowing &&
@@ -1291,12 +1291,12 @@ public class DiscreteSlider extends View {
 		float ratio = mRadius / r2;
 
 		float length = mLength - mTrackWidth;
-		if (mPaddingPosition == mMinProgress || mMaxProgress != -1 && mMode != MODE_NORMAL) {
+		if (mPendingPosition == mMinProgress || mMaxProgress != -1 && mMode != MODE_NORMAL) {
 			if (mOrientation == HORIZONTAL) {
 				cy2 = (getHeight() - getPaddingTop() - getPaddingBottom()) / 2f + getPaddingTop();
-				cx2 = getPosition(length, mPaddingPosition, true);
+				cx2 = getPosition(length, mPendingPosition, true);
 			} else {
-				cy2 = getPosition(length, mPaddingPosition, true);
+				cy2 = getPosition(length, mPendingPosition, true);
 				cx2 = (getWidth() - getPaddingLeft() - getPaddingRight()) / 2f + getPaddingLeft();
 			}
 		} else {
@@ -1392,10 +1392,10 @@ public class DiscreteSlider extends View {
 	private float getPosition(float length, int progress, boolean withOffset) {
 		if (mOrientation == HORIZONTAL) {
 			return getPaddingLeft() + length / (mCount - 1) * progress + mRadius +
-					(withOffset && mPaddingPosition == progress ? mOffset : 0);
+					(withOffset && mPendingPosition == progress ? mOffset : 0);
 		} else {
 			return getPaddingTop() + length / (mCount - 1) * progress + mRadius +
-					(withOffset && mPaddingPosition == progress ? mOffset : 0);
+					(withOffset && mPendingPosition == progress ? mOffset : 0);
 		}
 	}
 
