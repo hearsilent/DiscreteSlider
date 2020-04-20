@@ -33,7 +33,7 @@ allprojects {
 **Step 2.** Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.hearsilent:DiscreteSlider:1.2.0'
+    implementation 'com.github.hearsilent:DiscreteSlider:1.2.1'
 }
 ```
    
