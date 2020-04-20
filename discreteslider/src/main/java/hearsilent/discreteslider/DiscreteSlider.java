@@ -911,6 +911,7 @@ public class DiscreteSlider extends View {
 
 		if (value == 1) {
 			mValueLabelAnimator = null;
+			generateValueLabelPath();
 			return;
 		}
 
