@@ -689,6 +689,7 @@ public class DiscreteSlider extends View {
 					mValueLabelAnimator = null;
 				}
 				mValueLabelAnimValue = 0;
+				mValueLabelIsShowing = false;
 				mShowValueLabelHandler.removeCallbacksAndMessages(null);
 			}
 
