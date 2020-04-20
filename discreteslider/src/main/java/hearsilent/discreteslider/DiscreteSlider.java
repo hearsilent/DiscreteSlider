@@ -478,6 +478,8 @@ public class DiscreteSlider extends View {
 	}
 
 	public void setMinProgress(int progress) {
+		boolean isTouchOnMinProgress = mPendingPosition == mMinProgress;
+
 		int _progress = mMinProgress;
 		mMinProgress = progress;
 		checkProgressBound();
@@ -490,9 +492,23 @@ public class DiscreteSlider extends View {
 			}
 		}
 
-		if ((mValueLabelMode >> 1 & 0x1) == 1) {
+		if ((mValueLabelMode >> 1 & 0x1) == 1 && (mPendingPosition == -1 || isTouchOnMinProgress)) {
 			showMinValueLabel();
+		} else if (mPendingPosition != -1) {
+			if (isTouchOnMinProgress) {
+				mPendingPosition = mMinProgress;
+				if (mPressedPosition != -1) {
+					mPressedPosition = mMinProgress;
+				}
+			} else {
+				mPendingPosition = mMaxProgress;
+				if (mPressedPosition != -1) {
+					mPressedPosition = mMaxProgress;
+				}
+			}
+			generateValueLabelPath();
 		}
+		checkOffsetBounds(mPressedPosition != -1);
 
 		invalidate();
 	}
@@ -509,6 +525,9 @@ public class DiscreteSlider extends View {
 		if (mMode != MODE_RANGE) {
 			throw new IllegalStateException("Set max progress must be range mode.");
 		}
+
+		boolean isTouchOnMinProgress = mPendingPosition == mMinProgress;
+
 		int _progress = mMaxProgress;
 		mMaxProgress = progress;
 		checkProgressBound();
@@ -519,9 +538,23 @@ public class DiscreteSlider extends View {
 			}
 		}
 
-		if ((mValueLabelMode >> 1 & 0x1) == 1) {
+		if ((mValueLabelMode >> 1 & 0x1) == 1 && (mPendingPosition == -1 || !isTouchOnMinProgress)) {
 			showMaxValueLabel();
+		} else if (mPendingPosition != -1) {
+			if (isTouchOnMinProgress) {
+				mPendingPosition = mMinProgress;
+				if (mPressedPosition != -1) {
+					mPressedPosition = mMinProgress;
+				}
+			} else {
+				mPendingPosition = mMaxProgress;
+				if (mPressedPosition != -1) {
+					mPressedPosition = mMaxProgress;
+				}
+			}
+			generateValueLabelPath();
 		}
+		checkOffsetBounds(mPressedPosition != -1);
 
 		invalidate();
 	}
@@ -710,22 +743,7 @@ public class DiscreteSlider extends View {
 				}
 			}
 
-			p = getPosition(length, mPendingPosition, false);
-			if (mPendingPosition == mMinProgress) {
-				mMinOffset = getPosition(length, 0, false) - p;
-				if (mMaxProgress != -1 && mMode == MODE_RANGE) {
-					mMaxOffset = getPosition(length, mMaxProgress - 1, false) - p;
-				} else {
-					mMaxOffset = getPosition(length, mCount - 1, false) - p;
-				}
-				mPressedPosition = mPendingPosition;
-			} else if (mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) {
-				mMinOffset = getPosition(length, mMinProgress + 1, false) - p;
-				mMaxOffset = getPosition(length, mCount - 1, false) - p;
-				mPressedPosition = mPendingPosition;
-			} else if (!isClickable()) {
-				mPendingPosition = -1;
-			}
+			checkOffsetBounds(true);
 
 			if (mPendingPosition == mMinProgress ||
 					mPendingPosition == mMaxProgress && mMaxProgress != -1 && mMode == MODE_RANGE) {
@@ -898,6 +916,30 @@ public class DiscreteSlider extends View {
 		mMoveDetector.onTouchEvent(event);
 		invalidate();
 		return true;
+	}
+
+	private void checkOffsetBounds(boolean isTouching) {
+		float length = mLength - mTrackWidth;
+		float p = getPosition(length, mPendingPosition, false);
+		if (mPendingPosition == mMinProgress) {
+			mMinOffset = getPosition(length, 0, false) - p;
+			if (mMaxProgress != -1 && mMode == MODE_RANGE) {
+				mMaxOffset = getPosition(length, mMaxProgress - 1, false) - p;
+			} else {
+				mMaxOffset = getPosition(length, mCount - 1, false) - p;
+			}
+			if (isTouching) {
+				mPressedPosition = mPendingPosition;
+			}
+		} else if (mPendingPosition == mMaxProgress && mMode != MODE_NORMAL) {
+			mMinOffset = getPosition(length, mMinProgress + 1, false) - p;
+			mMaxOffset = getPosition(length, mCount - 1, false) - p;
+			if (isTouching) {
+				mPressedPosition = mPendingPosition;
+			}
+		} else if (!isClickable()) {
+			mPressedPosition = mPendingPosition = -1;
+		}
 	}
 
 	private void animValueLabel() {
