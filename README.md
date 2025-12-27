@@ -1,5 +1,6 @@
 # DiscreteSlider
 [![JitPack](https://jitpack.io/v/hearsilent/DiscreteSlider.svg)](https://jitpack.io/#hearsilent/DiscreteSlider)
+[![JitPack](https://jitpack.io/v/hearsilent/DiscreteSlider/month.svg)](https://jitpack.io/#hearsilent/DiscreteSlider)
 [![license](https://img.shields.io/github/license/hearsilent/DiscreteSlider.svg?maxAge=2592000)](https://github.com/hearsilent/DiscreteSlider/blob/master/LICENSE)
 
 DiscreteSlider tries to offer you the slider with value label as shown in the [Material Design spec](https://material.io/design/components/sliders.html), with an API. The library also offer you range slider mode.
